@@ -72,6 +72,7 @@ $ python setup.py install
 
 ### 更新记录
 
+* `v0.1.1`：尝试上传到[PyPI](https://pypi.org/)
 * `v0.1`：完成基本功能
 
 ### 参数说明
