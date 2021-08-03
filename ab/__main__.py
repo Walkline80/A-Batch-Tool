@@ -20,8 +20,6 @@ TEMP_PATH = 'temp'
 
 parser = None
 
-def get_serial_ports():
-	return [str(port) for port in comports()]
 
 def list_all_files(root, dir=False):
 	dir_or_files = []
@@ -46,30 +44,44 @@ def list_all_files(root, dir=False):
 
 	return dir_or_files
 
-def ab(options, files):
-	global parser
+def choose_a_port():
+	port_list = [str(port) for port in comports()]
 
-	config_file = CONFIG_FILE if not files else files[0]
+	print('Port List:')
+	for index, port in enumerate(port_list, start=1):
+		print(f'    [{index}] {port}')
+	
+	selected_port = None
 
-	if not os.path.exists(config_file):
-		parser.print_help()
-		exit(0)
+	while True:
+		try:
+			selected_port = int(input('Choose a port: '))
 
+			assert type(selected_port) is int and 0 < selected_port <= len(port_list)
+			
+			return port_list[selected_port - 1].split(' - ')[0]
+		except KeyboardInterrupt:
+			exit()
+		except:
+			pass
+
+def parse_config_file(config_file):
 	includes = []
 	excludes = []
 
 	with open(config_file, 'r') as config:
-		lines = config.readlines()
+		lines = config.read().splitlines()
 
 	for line in lines:
-		line = line.strip('\n')
-
 		if line:
 			if line.startswith('# '):
 				excludes.append(line.split()[1])
 			else:
 				includes.append(line)
 
+	return includes, excludes
+
+def filter_files_and_dirs(includes, excludes):
 	include_files = []
 	excluede_files = []
 	include_dirs = []
@@ -93,36 +105,43 @@ def ab(options, files):
 	include_files.sort()
 	include_dirs.sort()
 
-	print(f'include_files: {include_files}')
-	print(f'include_dirs: {include_dirs}')
+	return include_files, include_dirs
 
-	port_list = get_serial_ports()
+def ab(options, files):
+	global parser
 
-	print('Port List:')
-	for index, port in enumerate(port_list, start=1):
-		print(f'    [{index}] {port}')
-	
-	selected_port = None
-	while True:
-		try:
-			selected_port = int(input('Choose a port: '))
+	config_file = CONFIG_FILE if not files else files[0]
 
-			assert type(selected_port) is int and 0 < selected_port <= len(port_list)
-			break
-		except KeyboardInterrupt:
-			exit()
-		except:
-			pass
+	if not os.path.exists(config_file):
+		parser.print_help()
+		exit(0)
 
-	selected_port = port_list[selected_port - 1].split(' - ')[0]
+	port = 'COM3' if options.simulate else choose_a_port()
+
+	includes, excludes = parse_config_file(config_file)
+	include_files, include_dirs = filter_files_and_dirs(includes, excludes)
+
+	if not options.quiet:
+		print(f'\nFile List ({len(include_files)}):')
+		for file in include_files:
+			print(f'    {file}')
+		
+		print(f'\nDir List ({len(include_dirs)})')
+		for dir in include_dirs:
+			print(f'    {dir}')
+
+	if not options.quiet:
+		print('\nMaking dirs on board...')
 
 	for dir in include_dirs:
-		# os.system(f'ampy -p {selected_port} -b 115200 -d 0.2 mkdir {dir}')
-		print(f'ampy -p {selected_port} -b 115200 -d 0.2 mkdir {dir}')
-
+		if options.simulate:
+			print(f'ampy -p {port} -b 115200 -d 0.2 mkdir {dir}')
+		else:
+			os.system(f'ampy -p {port} -b 115200 -d 0.2 mkdir {dir}')
+		
 		sleep(0.2)
-	
-	if not options.minify:
+
+	if options.minify:
 		if not options.temp_path:
 			options.temp_path = TEMP_PATH
 
@@ -130,26 +149,31 @@ def ab(options, files):
 			os.mkdir(options.temp_path)
 	else:
 		for index, file in enumerate(include_files, start=1):
-			print(f'upload {index}/{len(include_files)}')
-			# os.system(f'ampy -p {selected_port} -b 115200 -d 0.2 put {file}')
-			print(f'ampy -p {selected_port} -b 115200 -d 0.2 put {file}')
+			if not options.quiet:
+				print(f'\nupload {file} ({index}/{len(include_files)})')
+
+			if options.simulate:
+				print(f'ampy -p {port} -b 115200 -d 0.2 put {file}')
+			else:
+				os.system(f'ampy -p {port} -b 115200 -d 0.2 put {file}')
+			
 			sleep(0.2)
-		
-		print('upload finished')
+
+		print('\nupload finished')
 
 def main():
 	global parser
 
 	usage = '%prog [options] [config_file]'
 
-	parser = OptionParser(usage, version=__version__)
+	parser = OptionParser(usage, version=f'ampy batch tool ({__version__})')
 	parser.disable_interspersed_args()
 
 	parser.add_option(
 		'-m', '--minify',
 		action = 'store_true',
 		dest = 'minify',
-		default = True,
+		default = False,
 		help = 'minify .py files which put to board'
 	)
 	parser.add_option(
@@ -159,6 +183,20 @@ def main():
 		metavar = '<temp_path>',
 		help = 'put all files into a specified path'
 	)
+	parser.add_option(
+		'-q', '--quiet',
+		action = 'store_true',
+		dest = 'quiet',
+		default = False,
+		help = 'no relevant information output'
+	)
+	parser.add_option(
+		'-s', '--simulate',
+		action = 'store_true',
+		dest = 'simulate',
+		default = False,
+		help = 'just print command lines for review'
+	)
 
 	options, files = parser.parse_args()
 
@@ -166,16 +204,4 @@ def main():
 
 
 if __name__ == '__main__':
-	class Options:
-		def __init__(self, args_dict):
-			self.minify = True
-			self.temp_path = None
-
-		def __str__(self):
-			return str({'minify': self.minify, 'temp_path': self.temp_path})
-
-	options = Options({'minify': True, 'temp_path': None})
-	files = []
-
-	ab(options, files)
-
+	main()
