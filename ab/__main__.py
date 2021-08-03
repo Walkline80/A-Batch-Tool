@@ -148,9 +148,14 @@ def ab(options, files):
 		if not os.path.exists(options.temp_path):
 			os.mkdir(options.temp_path)
 	else:
+		if not options.quiet:
+			print('\nUpload files to board...')
+		else:
+			print('')
+
 		for index, file in enumerate(include_files, start=1):
 			if not options.quiet:
-				print(f'\nupload {file} ({index}/{len(include_files)})')
+				print(f'Uploading {file} ({index}/{len(include_files)})')
 
 			if options.simulate:
 				print(f'ampy -p {port} -b 115200 -d 0.2 put {file}')
@@ -159,7 +164,7 @@ def ab(options, files):
 			
 			sleep(0.2)
 
-		print('\nupload finished')
+		print('\nUpload finished')
 
 def main():
 	global parser
