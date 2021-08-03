@@ -3,11 +3,11 @@ from setuptools import setup
 
 
 setup(
-	name = 'ampy_batch',
+	name = 'ampy-batch-tool',
 	packages = ['ab'],
 	version = ab.__version__,
 	author = ab.__author__,
-	description = 'An AMPY batch tool',
+	description = 'An adafruit-ampy batch tool',
 	url = 'https://gitee.com/walkline/a-batch-tool',
 	license = 'MIT',
 	provides = ['ab'],
