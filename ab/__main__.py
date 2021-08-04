@@ -5,11 +5,15 @@ Gitee: https://gitee.com/walkline/a-batch-tool
 """
 from optparse import OptionParser
 from serial.tools.list_ports import comports
-from pyboard import Pyboard, stdout_write_bytes
 import os, sys
 import tempfile
 from time import sleep
 import shutil
+
+try:
+	from pyboard import Pyboard, stdout_write_bytes
+except ModuleNotFoundError:
+	from .pyboard import Pyboard, stdout_write_bytes
 
 try:
 	from __init__ import __version__
