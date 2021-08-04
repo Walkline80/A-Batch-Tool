@@ -5,21 +5,41 @@ Gitee: https://gitee.com/walkline/a-batch-tool
 """
 from optparse import OptionParser
 from serial.tools.list_ports import comports
+from pyboard import Pyboard, stdout_write_bytes
 import os, sys
 import tempfile
 from time import sleep
+import shutil
 
 try:
 	from __init__ import __version__
 except ModuleNotFoundError:
 	from . import __version__
 
+try:
+	stdout = sys.stdout.buffer
+except AttributeError:
+	stdout = sys.stdout
+
 
 CONFIG_FILE = 'abconfig'
-TEMP_PATH = 'temp'
+
+CMD_MKDIRS = \
+'''
+for dir in {}:
+  try:
+    import os
+    os.mkdir(dir)
+  except OSError as ose:
+    if str(ose) == '[Errno 17] EEXIST':
+      if not {}:
+        print('    {{}}/ exist'.format(dir))
+    else:
+      print(ose)
+'''
+
 
 parser = None
-
 
 def list_all_files(root, dir=False):
 	dir_or_files = []
@@ -105,6 +125,10 @@ def filter_files_and_dirs(includes, excludes):
 	include_files.sort()
 	include_dirs.sort()
 
+	if 'main.py' in include_files:
+		include_files.remove('main.py')
+		include_files.append('main.py')
+
 	return include_files, include_dirs
 
 def ab(options, files):
@@ -116,55 +140,63 @@ def ab(options, files):
 		parser.print_help()
 		exit(0)
 
-	port = 'COM3' if options.simulate else choose_a_port()
+	if options.simulate:
+		options.quiet = False
+
+	port = '' if options.simulate else choose_a_port()
 
 	includes, excludes = parse_config_file(config_file)
 	include_files, include_dirs = filter_files_and_dirs(includes, excludes)
 
 	if not options.quiet:
 		print(f'\nFile List ({len(include_files)}):')
-		for file in include_files:
-			print(f'    {file}')
+		print('{}'.format('\n'.join([f'    {file}' for file in include_files])))
 		
 		print(f'\nDir List ({len(include_dirs)})')
-		for dir in include_dirs:
-			print(f'    {dir}')
+		print('{}'.format('\n'.join([f'    {dir}/' for dir in include_dirs])))
 
-	if not options.quiet:
 		print('\nMaking dirs on board...')
 
-	for dir in include_dirs:
-		if options.simulate:
-			print(f'ampy -p {port} -b 115200 -d 0.2 mkdir {dir}')
-		else:
-			os.system(f'ampy -p {port} -b 115200 -d 0.2 mkdir {dir}')
-		
-		sleep(0.2)
+	if options.simulate:
+		print('Upload files to board...')
+		print('Upload finished')
 
-	if options.minify:
-		if not options.temp_path:
-			options.temp_path = TEMP_PATH
+		exit(0)
 
-		if not os.path.exists(options.temp_path):
-			os.mkdir(options.temp_path)
-	else:
+	pyboard = Pyboard(port)
+	pyboard.enter_raw_repl()
+
+	cmd = CMD_MKDIRS.format(include_dirs, options.quiet)
+	pyboard.exec(cmd, data_consumer=stdout_write_bytes)
+
+	temp_dir = None
+
+	# if options.minify:
+	# 	temp_dir = tempfile.TemporaryDirectory(prefix='ab_')
+
+	# 	for dir in include_dirs:
+	# 		dest_dir = os.path.join(temp_dir.name, dir)
+	# 		if not os.path.exists(dest_dir):
+	# 			os.mkdir(dest_dir)
+	
+	# 	for file in include_files:
+	# 		dest_file = os.path.join(temp_dir.name, file)
+	# 		shutil.copyfile(file, dest_file)
+
+	print('{}'.format('\nUpload files to board...' if not options.quiet else ''))
+
+	for index, file in enumerate(include_files, start=1):
 		if not options.quiet:
-			print('\nUpload files to board...')
-		else:
-			print('')
+			print(f'    uploading {file} ({index}/{len(include_files)})')
 
-		for index, file in enumerate(include_files, start=1):
-			if not options.quiet:
-				print(f'Uploading {file} ({index}/{len(include_files)})')
+		pyboard.fs_put(os.path.join(temp_dir.name if temp_dir else '', file), file)
 
-			if options.simulate:
-				print(f'ampy -p {port} -b 115200 -d 0.2 put {file}')
-			else:
-				os.system(f'ampy -p {port} -b 115200 -d 0.2 put {file}')
-			
-			sleep(0.2)
+	pyboard.exit_raw_repl()
 
-		print('\nUpload finished')
+	if temp_dir:
+		temp_dir.cleanup()
+
+	print('\nUpload Finished')
 
 def main():
 	global parser
@@ -174,20 +206,20 @@ def main():
 	parser = OptionParser(usage, version=f'ampy batch tool ({__version__})')
 	parser.disable_interspersed_args()
 
-	parser.add_option(
-		'-m', '--minify',
-		action = 'store_true',
-		dest = 'minify',
-		default = False,
-		help = 'minify .py files which put to board'
-	)
-	parser.add_option(
-		'-t', '--temp-path',
-		dest = 'temp_path',
-		default = None,
-		metavar = '<temp_path>',
-		help = 'put all files into a specified path'
-	)
+	# parser.add_option(
+	# 	'-m', '--minify',
+	# 	action = 'store_true',
+	# 	dest = 'minify',
+	# 	default = False,
+	# 	help = 'minify .py files which put to board'
+	# )
+	# parser.add_option(
+	# 	'-t', '--temp-path',
+	# 	dest = 'temp_path',
+	# 	default = None,
+	# 	metavar = '<temp_path>',
+	# 	help = 'put all files into a specified path'
+	# )
 	parser.add_option(
 		'-q', '--quiet',
 		action = 'store_true',
