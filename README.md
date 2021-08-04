@@ -81,12 +81,13 @@ $ python setup.py install
 
 ### 更新记录
 
+* `v0.2.1`：修复导入模块路径问题
 * `v0.2`：
 	* 使用 [pyboard.py](https://github.com/micropython/micropython/blob/master/tools/pyboard.py) 替代`ampy`以提升文件上传效率，并解决`已知问题 1`
 	* 禁用了代码压缩功能，使用 [pyminifier](http://liftoff.github.io/pyminifier/index.html) 压缩代码会出现问题
 	* 删除指定临时目录参数
 
-* `v0.1.1`：尝试上传到[PyPI](https://pypi.org/)
+* `v0.1.1`：尝试上传到 [PyPI](https://pypi.org/)
 * `v0.1`：完成基本功能
 
 ### 参数说明
