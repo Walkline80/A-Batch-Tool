@@ -81,6 +81,7 @@ $ python setup.py install
 
 ### 更新记录
 
+* `v0.2.2`：修复某些开发板不能读取串口数据的问题（如`安信可 ESP32C3 系列开发板`）
 * `v0.2.1`：修复导入模块路径问题
 * `v0.2`：
 	* 使用 [pyboard.py](https://github.com/micropython/micropython/blob/master/tools/pyboard.py) 替代`ampy`以提升文件上传效率，并解决`已知问题 1`
