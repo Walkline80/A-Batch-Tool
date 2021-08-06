@@ -37,7 +37,7 @@ for dir in {}:
   except OSError as ose:
     if str(ose) == '[Errno 17] EEXIST':
       if not {}:
-        print('    {{}} exist'.format(dir))
+        print('- {{}} exist'.format(dir))
     else:
       print(ose)
 '''
@@ -63,10 +63,10 @@ def list_all_files_and_dirs(includes, excludes):
 					full_path = os.path.join(root, file)
 
 					if full_path not in excludes:
-						file_list.append(full_path)
+						file_list.append(full_path.replace('\\', '/'))
 		else:
 			if include not in excludes:
-				file_list.append(include)
+				file_list.append(include.replace('\\', '/'))
 
 	for file in file_list:
 		splited_path = os.path.split(file)[0].split(os.path.sep)
@@ -75,7 +75,7 @@ def list_all_files_and_dirs(includes, excludes):
 			full_path = os.path.sep.join(splited_path[:index + 1])
 
 			if full_path not in dir_list and full_path:
-				dir_list.append(full_path)
+				dir_list.append(full_path.replace('\\', '/'))
 
 	file_list.sort()
 	dir_list.sort()
@@ -192,7 +192,7 @@ def ab(options, files):
 
 	for index, file in enumerate(include_files, start=1):
 		if not options.quiet:
-			print(f'    uploading {file} ({index}/{len(include_files)})')
+			print(f'- uploading {file} ({index}/{len(include_files)})')
 
 		pyboard.fs_put(os.path.join(temp_dir.name if temp_dir else '', file), file)
 
