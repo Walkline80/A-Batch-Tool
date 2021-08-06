@@ -6,9 +6,8 @@ Gitee: https://gitee.com/walkline/a-batch-tool
 from optparse import OptionParser
 from serial.tools.list_ports import comports
 import os, sys
-import tempfile
-from time import sleep
-import shutil
+import shutil, tempfile
+
 
 try:
 	from pyboard import Pyboard, stdout_write_bytes
@@ -26,7 +25,8 @@ except AttributeError:
 	stdout = sys.stdout
 
 
-CONFIG_FILE = 'abconfig'
+DEFAULT_CONFIG_FILE = 'abconfig'
+EXCLUDE_PREFIX = '# '
 
 CMD_MKDIRS = \
 '''
@@ -37,36 +37,55 @@ for dir in {}:
   except OSError as ose:
     if str(ose) == '[Errno 17] EEXIST':
       if not {}:
-        print('    {{}}/ exist'.format(dir))
+        print('    {{}} exist'.format(dir))
     else:
       print(ose)
 '''
 
-
 parser = None
 
-def list_all_files(root, dir=False):
-	dir_or_files = []
+def list_all_files_and_dirs(includes, excludes):
+	dir_list = []
+	file_list = []
+	bad_list = []
 
-	if os.path.isfile(root):
-		if not dir:
-			dir_or_files.append(root.strip('/'))
-	else:
-		if dir:
-			dir_or_files.append(root.strip('/'))
+	for include in includes:
+		if not os.path.exists(include):
+			bad_list.append(include)
+			continue
 
-		for path in os.listdir(root):
-			full_path = os.path.join(root, path)
+		if os.path.isdir(include):
+			for root, _, files in os.walk(include):
+				if root in excludes:
+					continue
 
-			if os.path.isdir(full_path):
-				if dir:
-					dir_or_files.append(full_path.strip('/'))
+				for file in files:
+					full_path = os.path.join(root, file)
 
-				dir_or_files.extend(list_all_files(full_path))
-			elif os.path.isfile(full_path) and not dir:
-				dir_or_files.append(full_path)
+					if full_path not in excludes:
+						file_list.append(full_path)
+		else:
+			if include not in excludes:
+				file_list.append(include)
 
-	return dir_or_files
+	for file in file_list:
+		splited_path = os.path.split(file)[0].split(os.path.sep)
+
+		for index in range(len(splited_path) + 1):
+			full_path = os.path.sep.join(splited_path[:index + 1])
+
+			if full_path not in dir_list and full_path:
+				dir_list.append(full_path)
+
+	file_list.sort()
+	dir_list.sort()
+	bad_list.sort()
+
+	if 'main.py' in file_list:
+		file_list.remove('main.py')
+		file_list.append('main.py')
+
+	return file_list, dir_list, bad_list
 
 def choose_a_port():
 	port_list = [str(port) for port in comports()]
@@ -98,47 +117,22 @@ def parse_config_file(config_file):
 
 	for line in lines:
 		if line:
-			if line.startswith('# '):
-				excludes.append(line.split()[1])
+			if line.startswith(EXCLUDE_PREFIX):
+				excludes.append(os.path.normpath(line.strip(EXCLUDE_PREFIX + '/\\')))
 			else:
-				includes.append(line)
+				includes.append(os.path.normpath(line.strip('/\\')))
 
 	return includes, excludes
-
-def filter_files_and_dirs(includes, excludes):
-	include_files = []
-	excluede_files = []
-	include_dirs = []
-	excluede_dirs = []
-
-	for include in includes:
-		include_files.extend(list_all_files(include))
-	
-	for exclude in excludes:
-		excluede_files.extend(list_all_files(exclude))
-	
-	for include in includes:
-		include_dirs.extend(list_all_files(include, True))
-
-	for exclude in excludes:
-		excluede_dirs.extend(list_all_files(exclude, True))
-
-	include_files = list(set(include_files) - set(excluede_files))
-	include_dirs = list(set(include_dirs) - set(excluede_dirs))
-
-	include_files.sort()
-	include_dirs.sort()
-
-	if 'main.py' in include_files:
-		include_files.remove('main.py')
-		include_files.append('main.py')
-
-	return include_files, include_dirs
 
 def ab(options, files):
 	global parser
 
-	config_file = CONFIG_FILE if not files else files[0]
+	if options.readme:
+		import webbrowser
+		webbrowser.open('https://gitee.com/walkline/a-batch-tool')
+		exit(0)
+
+	config_file = DEFAULT_CONFIG_FILE if not files else files[0]
 
 	if not os.path.exists(config_file):
 		parser.print_help()
@@ -148,23 +142,30 @@ def ab(options, files):
 		options.quiet = False
 
 	port = '' if options.simulate else choose_a_port()
-
 	includes, excludes = parse_config_file(config_file)
-	include_files, include_dirs = filter_files_and_dirs(includes, excludes)
+	include_files, include_dirs, bad_list = list_all_files_and_dirs(includes, excludes)
+
+	if not include_files:
+		print('Nothing to do!')
+		exit(0)
 
 	if not options.quiet:
 		print(f'\nFile List ({len(include_files)}):')
-		print('{}'.format('\n'.join([f'    {file}' for file in include_files])))
-		
-		print(f'\nDir List ({len(include_dirs)})')
-		print('{}'.format('\n'.join([f'    {dir}/' for dir in include_dirs])))
+		print('{}'.format('\n'.join([f'- {file}' for file in include_files])))
+
+		if include_dirs:
+			print(f'\nDir List ({len(include_dirs)})')
+			print('{}'.format('\n'.join([f'- {dir}' for dir in include_dirs])))
+
+		if bad_list:
+			print(f'\nNot Found List ({len(bad_list)})')
+			print('{}'.format('\n'.join([f'- {dir_or_file}' for dir_or_file in bad_list])))
 
 		print('\nMaking dirs on board...')
 
 	if options.simulate:
 		print('Upload files to board...')
-		print('Upload finished')
-
+		print('Simulate finished')
 		exit(0)
 
 	pyboard = Pyboard(port)
@@ -205,7 +206,10 @@ def ab(options, files):
 def main():
 	global parser
 
-	usage = '%prog [options] [config_file]'
+	usage = \
+'''%prog [OPTIONS] [CONFIG FILE]
+
+  ampy batch tool - MicroPython files upload tool'''
 
 	parser = OptionParser(usage, version=f'ampy batch tool ({__version__})')
 	parser.disable_interspersed_args()
@@ -237,6 +241,12 @@ def main():
 		dest = 'simulate',
 		default = False,
 		help = 'just print command lines for review'
+	)
+	parser.add_option(
+		'--readme',
+		action = 'store_true',
+		dest = 'readme',
+		help = 'show readme manual in web browser'
 	)
 
 	options, files = parser.parse_args()
