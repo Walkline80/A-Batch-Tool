@@ -53,24 +53,27 @@ $ python setup.py install
 	Choose a port: 1
 
 	File List (3):
-	    drivers/button.py
-	    services/mqtt.py
-	    main.py
+	- drivers/button.py
+	- services/mqtt.py
+	- main.py
 
 	Dir List (3)
-	    drivers/
-	    drivers/others/
-	    services/
+	- drivers
+	- drivers/others
+	- services
+
+	Not Found List (1)
+	- not_exists
 
 	Making dirs on board...
-	    drivers/ exist
-	    drivers/others/ exist
-	    services/ exist
+	- drivers exist
+	- drivers/others exist
+	- services exist
 
 	Upload files to board...
-	    uploading drivers/button.py (1/3)
-	    uploading services/mqtt.py (2/3)
-	    uploading main.py (3/3)
+	- uploading drivers/button.py (1/3)
+	- uploading services/mqtt.py (2/3)
+	- uploading main.py (3/3)
 
 	Upload Finished
 	```
@@ -79,7 +82,14 @@ $ python setup.py install
 
 1. ~~调用`ampy`工具新建文件夹的时候如果文件夹已存在，则会抛出异常且无法捕捉~~
 
+2. 偶尔出现无法进入`raw_repl`模式的问题，重新运行一次即可解决
+
 ### 更新记录
+
+* `v0.3`：
+	* 重构了获取所有文件和文件夹列表功能
+	* 增加了显示网页版使用说明的参数
+	* `enter_raw_repl()`中增加延时，尝试解决`已知问题2`
 
 * `v0.2.2`：修复某些开发板不能读取串口数据的问题（如`安信可 ESP32C3 系列开发板`）
 * `v0.2.1`：修复导入模块路径问题
@@ -97,6 +107,7 @@ $ python setup.py install
 * ~~`-m`：使用`minify`工具压缩代码（功能未实现）~~
 * `-q`：屏蔽操作过程中的相关提示
 * `-s`：模拟操作过程，不实际上传文件
+* `--readme`：在网页中显示使用说明
 
 ### 合作交流
 
