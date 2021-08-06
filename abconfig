@@ -1,6 +1,7 @@
 drivers/
 services/
 main.py
+not_exists/
 
 # services/websocket.py
 # .git/
