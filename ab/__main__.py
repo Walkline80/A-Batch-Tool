@@ -63,19 +63,23 @@ def list_all_files_and_dirs(includes, excludes):
 					full_path = os.path.join(root, file)
 
 					if full_path not in excludes:
-						file_list.append(full_path.replace('\\', '/'))
+						file_list.append(full_path)
 		else:
 			if include not in excludes:
-				file_list.append(include.replace('\\', '/'))
+				file_list.append(include)
 
 	for file in file_list:
 		splited_path = os.path.split(file)[0].split(os.path.sep)
 
 		for index in range(len(splited_path) + 1):
-			full_path = os.path.sep.join(splited_path[:index + 1])
+			full_path = os.path.sep.join(splited_path[:index])
 
 			if full_path not in dir_list and full_path:
-				dir_list.append(full_path.replace('\\', '/'))
+				dir_list.append(full_path)
+
+	for items in [file_list, dir_list, bad_list]:
+		for index, item in enumerate(items):
+			items[index] = item.replace('\\', '/')
 
 	file_list.sort()
 	dir_list.sort()
