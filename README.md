@@ -11,7 +11,11 @@
 #### 在线安装（推荐）
 
 ```bash
+# 安装
 $ pip install ampy-batch-tool
+
+# 更新
+$ pip install --upgrade ampy-batch-tool
 ```
 
 #### 离线安装
@@ -86,6 +90,7 @@ $ python setup.py install
 
 ### 更新记录
 
+* `v0.3.2`：修复由于`v0.3.1`导致的分隔路径错误问题
 * `v0.3.1`：修复上传文件时字符转义的问题
 * `v0.3`：
 	* 重构了获取所有文件和文件夹列表功能
