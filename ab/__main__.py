@@ -8,7 +8,6 @@ from serial.tools.list_ports import comports
 import os, sys
 import shutil, tempfile
 
-
 try:
 	from pyboard import Pyboard, PyboardError, ProcessToSerial, stdout_write_bytes
 except ModuleNotFoundError:
@@ -216,13 +215,6 @@ def main():
 	# 	default = False,
 	# 	help = 'minify .py files which put to board'
 	# )
-	# parser.add_option(
-	# 	'-t', '--temp-path',
-	# 	dest = 'temp_path',
-	# 	default = None,
-	# 	metavar = '<temp_path>',
-	# 	help = 'put all files into a specified path'
-	# )
 	parser.add_option(
 		'-q', '--quiet',
 		action = 'store_true',
@@ -256,15 +248,12 @@ def main():
 	if options.readme:
 		import webbrowser
 		webbrowser.open('https://gitee.com/walkline/a-batch-tool')
-		exit(0)
-
-	if options.repl:
+	elif options.repl:
+		from .miniterm import main
 		port = choose_a_port()
-
-		os.system(f'python ab/miniterm.py {port} 115200')
-		exit(0)
-	
-	ab(options, files)
+		main(default_port=port)
+	else:
+		ab(options, files)
 
 
 if __name__ == '__main__':
