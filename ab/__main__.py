@@ -3,26 +3,21 @@ The MIT License (MIT)
 Copyright © 2021 Walkline Wang (https://walkline.wang)
 Gitee: https://gitee.com/walkline/a-batch-tool
 """
-from optparse import OptionParser
+from optparse import OptionParser, OptionGroup
 from serial.tools.list_ports import comports
 import os, sys
 import shutil, tempfile
 
 
 try:
-	from pyboard import Pyboard, stdout_write_bytes
+	from pyboard import Pyboard, PyboardError, ProcessToSerial, stdout_write_bytes
 except ModuleNotFoundError:
-	from .pyboard import Pyboard, stdout_write_bytes
+	from .pyboard import Pyboard, PyboardError, ProcessToSerial, stdout_write_bytes
 
 try:
 	from __init__ import __version__
 except ModuleNotFoundError:
 	from . import __version__
-
-try:
-	stdout = sys.stdout.buffer
-except AttributeError:
-	stdout = sys.stdout
 
 
 DEFAULT_CONFIG_FILE = 'abconfig'
@@ -131,11 +126,6 @@ def parse_config_file(config_file):
 def ab(options, files):
 	global parser
 
-	if options.readme:
-		import webbrowser
-		webbrowser.open('https://gitee.com/walkline/a-batch-tool')
-		exit(0)
-
 	config_file = DEFAULT_CONFIG_FILE if not files else files[0]
 
 	if not os.path.exists(config_file):
@@ -145,13 +135,14 @@ def ab(options, files):
 	if options.simulate:
 		options.quiet = False
 
-	port = '' if options.simulate else choose_a_port()
 	includes, excludes = parse_config_file(config_file)
 	include_files, include_dirs, bad_list = list_all_files_and_dirs(includes, excludes)
 
 	if not include_files:
 		print('Nothing to do!')
 		exit(0)
+
+	port = '' if options.simulate else choose_a_port()
 
 	if not options.quiet:
 		print(f'\nFile List ({len(include_files)}):')
@@ -247,6 +238,13 @@ def main():
 		help = 'just print command lines for review'
 	)
 	parser.add_option(
+		'--repl',
+		action = 'store_true',
+		dest = 'repl',
+		default = False,
+		help = 'enter raw repl mode'
+	)
+	parser.add_option(
 		'--readme',
 		action = 'store_true',
 		dest = 'readme',
@@ -255,6 +253,17 @@ def main():
 
 	options, files = parser.parse_args()
 
+	if options.readme:
+		import webbrowser
+		webbrowser.open('https://gitee.com/walkline/a-batch-tool')
+		exit(0)
+
+	if options.repl:
+		port = choose_a_port()
+
+		os.system(f'python ab/miniterm.py {port} 115200')
+		exit(0)
+	
 	ab(options, files)
 
 
