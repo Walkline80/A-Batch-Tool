@@ -26,7 +26,7 @@ $ pip install --upgrade ampy-batch-tool
 $ python setup.py install
 ```
 
-### 如何使用
+### 如何上传文件
 
 * 在你的项目文件夹下新建`abconfig`文件（`ab`工具默认查找该配置文件，也可以手动指定其它文件）
 
@@ -36,6 +36,7 @@ $ python setup.py install
 	drivers/
 	services/
 	main.py
+	not_exists/
 
 	# services/websocket.py
 	# .git/
@@ -82,6 +83,34 @@ $ python setup.py install
 	Upload Finished
 	```
 
+### 如何打开`repl`
+
+```bash
+$ ab --repl
+Port List:
+    [1] COM3 - Silicon Labs CP210x USB to UART Bridge (COM3)
+    [2] COM1 - 通信端口 (COM1)
+Choose a port: 1
+
+--- Miniterm for MicroPython REPL
+    Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
+
+>>> help()
+Welcome to MicroPython on the ESP32!
+
+For generic online docs please visit http://docs.micropython.org/
+>>>
+```
+
+### 参数说明
+
+* `-h`：显示使用说明
+* ~~`-m`：使用`minify`工具压缩代码（功能未实现）~~
+* `-q`：屏蔽操作过程中的相关提示
+* `-s`：模拟操作过程，不实际上传文件
+* `--repl`：进入`repl`模式
+* `--readme`：在网页中显示使用说明
+
 ### 已知问题
 
 1. ~~调用`ampy`工具新建文件夹的时候如果文件夹已存在，则会抛出异常且无法捕捉~~
@@ -90,6 +119,7 @@ $ python setup.py install
 
 ### 更新记录
 
+* `v0.4`：增加进入`repl`模式菜单和相关功能
 * `v0.3.2`：修复由于`v0.3.1`导致的分隔路径错误问题
 * `v0.3.1`：修复上传文件时字符转义的问题
 * `v0.3`：
@@ -106,14 +136,6 @@ $ python setup.py install
 
 * `v0.1.1`：尝试上传到 [PyPI](https://pypi.org/)
 * `v0.1`：完成基本功能
-
-### 参数说明
-
-* `-h`：显示使用说明
-* ~~`-m`：使用`minify`工具压缩代码（功能未实现）~~
-* `-q`：屏蔽操作过程中的相关提示
-* `-s`：模拟操作过程，不实际上传文件
-* `--readme`：在网页中显示使用说明
 
 ### 合作交流
 
