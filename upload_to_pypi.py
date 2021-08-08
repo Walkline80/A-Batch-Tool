@@ -7,8 +7,11 @@ REMOVE_DIRS = ['ampy_batch_tool.egg-info', 'build', 'dist']
 
 print('removing build folders...\n')
 
-for dir in REMOVE_DIRS:
-	shutil.rmtree(dir)
+try:
+	for dir in REMOVE_DIRS:
+		shutil.rmtree(dir)
+except:
+	pass
 
 print('building packages...\n')
 os.system('python setup.py sdist bdist_wheel')
