@@ -26,6 +26,11 @@ $ pip install --upgrade ampy-batch-tool
 $ python setup.py install
 ```
 
+```bash
+# for local develop
+$ pip install -e .
+```
+
 ### 如何上传文件
 
 * 在你的项目文件夹下新建`abconfig`文件（`ab`工具默认查找该配置文件，也可以手动指定其它文件）
