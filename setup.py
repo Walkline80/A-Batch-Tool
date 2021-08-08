@@ -33,7 +33,9 @@ setup(
 	]
 )
 
-# python setup.py sdist upload
+# for local develop
+# pip install -e .
+
 
 # pip install -U twine wheel setuptools
 # python setup.py sdist bdist_wheel
