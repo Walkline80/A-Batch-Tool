@@ -99,6 +99,7 @@ Choose a port: 1
 
 --- Miniterm for MicroPython REPL
     Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
+    Paste: CTRL + U
 
 >>> help()
 Welcome to MicroPython on the ESP32!
