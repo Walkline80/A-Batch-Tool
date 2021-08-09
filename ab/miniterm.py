@@ -13,6 +13,9 @@ import codecs
 import os
 import sys
 import threading
+import time
+import win32clipboard as clip
+
 
 import serial
 from serial.tools.list_ports import comports
@@ -150,6 +153,9 @@ if os.name == 'nt':  # noqa
                 ctypes.windll.kernel32.SetConsoleMode(ctypes.windll.kernel32.GetStdHandle(-11), self._saved_cm)
             except AttributeError: # in case no _saved_cm
                 pass
+
+        def sendkey(self, key):
+            msvcrt.putch(key)
 
         def getkey(self):
             while True:
@@ -379,6 +385,15 @@ class Miniterm(object):
                     self.dump_port_settings()
                 elif c == unichr(0x0f):     # CTRL + H
                     show_help()
+                elif c == unichr(0x15):     # CTRL + U
+                    self.serial.write(b"\x05\r") # b"\x05A\x01"
+                    clip.OpenClipboard()
+                    for line in clip.GetClipboardData().replace('\t', '    ').split('\r\n'):
+                        self.serial.write(line.encode() + b'\r')
+                        self.serial.flush()
+                        time.sleep(0.001)
+                    clip.CloseClipboard()
+                    self.serial.write(b'\x04')
                 else:
                     #~ if self.raw:
                     text = c
@@ -448,6 +463,7 @@ def show_help():
 
 --- Miniterm for MicroPython REPL
     Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
+    Paste: CTRL + U
 ''')
 
 

@@ -249,7 +249,10 @@ def main():
 		import webbrowser
 		webbrowser.open('https://gitee.com/walkline/a-batch-tool')
 	elif options.repl:
-		from .miniterm import main
+		try:
+			from .miniterm import main
+		except ImportError:
+			from miniterm import main
 		port = choose_a_port()
 		main(default_port=port)
 	else:
