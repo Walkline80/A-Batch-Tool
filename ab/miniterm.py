@@ -13,6 +13,9 @@ import codecs
 import os
 import sys
 import threading
+import time
+import win32clipboard as clip
+
 
 import serial
 from serial.tools.list_ports import comports
@@ -150,6 +153,9 @@ if os.name == 'nt':  # noqa
                 ctypes.windll.kernel32.SetConsoleMode(ctypes.windll.kernel32.GetStdHandle(-11), self._saved_cm)
             except AttributeError: # in case no _saved_cm
                 pass
+
+        def sendkey(self, key):
+            msvcrt.putch(key)
 
         def getkey(self):
             while True:
@@ -379,12 +385,35 @@ class Miniterm(object):
                     self.dump_port_settings()
                 elif c == unichr(0x0f):     # CTRL + H
                     show_help()
+                elif c == unichr(0x15):     # CTRL + U
+                    self.serial.write(b"\x05\r") # b"\x05A\x01"
+                    clip.OpenClipboard()
+                    # self.serial.writelines(clip.GetClipboardData().encode('utf-8'))
+                    # self.serial.flush()
+                    for line in clip.GetClipboardData().replace('\t', '    ').split('\r\n'):
+                        # self.console.write(line) # + b'\r')
+                        self.serial.write(line.encode() + b'\r')
+                        self.serial.flush()
+                        time.sleep(0.001)
+                    clip.CloseClipboard()
+                    self.serial.write(b'\x04')
+
+                    # self.serial.write(b"\x05")
+                    # data = self.serial.read(2)
+                    # if data == b"R\x00":
+                    #     # Device understood raw-paste command but doesn't support it.
+                    #     pass
+                    # elif data == b"R\x01":
+                    #     pass
+                    #     # Device supports raw-paste mode, write out the command using this mode.
+                    #     # return self.raw_paste_write(command_bytes)
                 else:
                     #~ if self.raw:
                     text = c
                     for transformation in self.tx_transformations:
                         text = transformation.tx(text)
                     self.serial.write(self.tx_encoder.encode(text))
+                # print(hex(ord(c)))
         except:
             self.alive = False
             raise
@@ -448,6 +477,7 @@ def show_help():
 
 --- Miniterm for MicroPython REPL
     Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
+    Paste: CTRL + U
 ''')
 
 
