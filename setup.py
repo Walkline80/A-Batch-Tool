@@ -27,7 +27,8 @@ setup(
 		],
 	},
 	install_requires = [
-		'pyserial'
+		'pyserial',
+		'pywin32'
 		# 'adafruit-ampy',
 		# 'pyminifier'
 	]
