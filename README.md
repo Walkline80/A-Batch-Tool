@@ -99,7 +99,7 @@ Choose a port: 1
 
 --- Miniterm for MicroPython REPL
     Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
-    Paste: CTRL + U
+    Paste: CTRL + U | Kill main.py: CTRL + [
 
 >>> help()
 Welcome to MicroPython on the ESP32!
@@ -110,9 +110,10 @@ For generic online docs please visit http://docs.micropython.org/
 #### `repl`模式快捷键
 
 * <kbd>ctrl</kbd> + <kbd>]</kbd>：退出`repl`
+* <kbd>ctrl</kbd> + <kbd>[</kbd>：一键删除`main.py`文件
+* <kbd>ctrl</kbd> + <kbd>u</kbd>：将剪贴板中的代码粘贴到`repl`中
 * <kbd>ctrl</kbd> + <kbd>l</kbd>：显示串口相关设置
 * <kbd>ctrl</kbd> + <kbd>o</kbd>：显示快捷键说明
-* <kbd>ctrl</kbd> + <kbd>p</kbd>：将剪贴板中的代码粘贴到`repl`中
 
 ### 参数说明
 
@@ -131,7 +132,8 @@ For generic online docs please visit http://docs.micropython.org/
 
 ### 更新记录
 
-* `v0.4.1`：`repl`模式增加粘贴代码功能，快捷键<kbd>ctrl</kbd> + <kbd>u</kbd>
+* `v0.4.2`：`repl`模式增加一键删除`main.py`文件功能
+* `v0.4.1`：`repl`模式增加粘贴代码功能
 * `v0.4`：增加进入`repl`模式菜单和相关功能
 * `v0.3.2`：修复由于`v0.3.1`导致的分隔路径错误问题
 * `v0.3.1`：修复上传文件时字符转义的问题
