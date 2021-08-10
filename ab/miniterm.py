@@ -386,20 +386,28 @@ class Miniterm(object):
                 elif c == unichr(0x0f):     # CTRL + H
                     show_help()
                 elif c == unichr(0x15):     # CTRL + U
-                    self.serial.write(b"\x05\r") # b"\x05A\x01"
+                    self.serial.write(b'\x05\r') # b"\x05A\x01"
                     clip.OpenClipboard()
-                    for line in clip.GetClipboardData().replace('\t', '    ').split('\r\n'):
-                        self.serial.write(line.encode() + b'\r')
+                    for line in clip.GetClipboardData().split('\r\n'):
+                        if line.strip('\t').startswith('#'):
+                            continue
+                        self.serial.write(line.replace('\t', '    ').encode() + b'\r')
                         self.serial.flush()
                         time.sleep(0.001)
                     clip.CloseClipboard()
                     self.serial.write(b'\x04')
+                elif c == unichr(0x1b):     # CTRL + [
+                    self.serial.write(b'\x05\r')
+                    self.serial.write(b'import os\rtry:\r  os.remove("main.py")\rexcept:\r  pass\r')
+                    self.serial.write(b'\x04\x04')
+                    self.serial.flush()
                 else:
                     #~ if self.raw:
                     text = c
                     for transformation in self.tx_transformations:
                         text = transformation.tx(text)
                     self.serial.write(self.tx_encoder.encode(text))
+                # print(hex(ord(c)))
         except:
             self.alive = False
             raise
@@ -433,7 +441,7 @@ def main(default_port=None, default_baudrate=115200, default_rts=False, default_
 
             serial_instance.open()
         except serial.SerialException as e:
-            sys.stderr.write('could not open port {!r}: {}\n'.format(default_port, e))
+            sys.stderr.write('{}\n'.format(e))
             sys.exit(1)
         else:
             break
@@ -463,7 +471,7 @@ def show_help():
 
 --- Miniterm for MicroPython REPL
     Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
-    Paste: CTRL + U
+    Paste: CTRL + U | Kill main.py: CTRL + [
 ''')
 
 
