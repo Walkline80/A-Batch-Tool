@@ -259,9 +259,12 @@ class Miniterm(object):
         self.menu_character = unichr(0x14)  # Menu: CTRL+T
         self.alive = None
         self._reader_alive = None
+        self._pause_reader = False
         self.receiver_thread = None
         self.rx_decoder = None
         self.tx_decoder = None
+
+        self.serial.write(b"\x04")
 
     def _start_reader(self):
         """Start reader thread"""
@@ -352,6 +355,8 @@ class Miniterm(object):
                 # read all that is there or wait for one byte
                 data = self.serial.read(self.serial.in_waiting or 1)
                 if data:
+                    if self._pause_reader:
+                        continue
                     if self.raw:
                         self.console.write_bytes(data)
                     else:
@@ -401,6 +406,25 @@ class Miniterm(object):
                     self.serial.write(b'import os\rtry:\r  os.remove("main.py")\rexcept:\r  pass\r')
                     self.serial.write(b'\x04\x04')
                     self.serial.flush()
+                elif c == unichr(0x12):     # CTRL + R
+                    self._pause_reader = True
+                    self.serial.write(b"\r\x01")
+
+                    with open('fontlib.py', 'rb') as file:
+                        pyfile = file.read()
+
+                    for i in range(0, len(pyfile), 256):
+                        self.serial.write(pyfile[i : min(i + 256, len(pyfile))])
+                        time.sleep(0.01)
+
+                    self.serial.write(b"\x04")
+
+                    time.sleep(0.2)
+                    self.console.write_bytes(b'\r\n')
+                    self._pause_reader = False
+                    self.serial.write(b"\r\x02")
+                elif c == unichr(0x14):     # CTRL +T
+                    self.serial.write(b'exec(open("onboard.py").read(), globals())\r\n')
                 else:
                     #~ if self.raw:
                     text = c
