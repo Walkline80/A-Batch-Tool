@@ -241,7 +241,10 @@ if os.name == 'nt':  # noqa
                 elif z is unichr(0) or z is unichr(0xe0):
                     try:
                         code = msvcrt.getwch()
-                        return self.navcodes[code]
+                        if ord(code) == 94: #, 95, 96, 97]:
+                            return code
+                        else:
+                            return self.navcodes[code]
                     except KeyError:
                         pass
                 else:
@@ -524,6 +527,8 @@ class Miniterm(object):
                     self.serial.write(b"\x04")
                     time.sleep(0.2)
                     self._pause_reader = False
+                elif c == unichr(0x5e):     # CTRL + F!
+                    print('f1')
                 else:
                     #~ if self.raw:
                     text = c
