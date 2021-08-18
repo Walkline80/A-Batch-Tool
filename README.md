@@ -97,9 +97,15 @@ Port List:
     [2] COM1 - 通信端口 (COM1)
 Choose a port: 1
 
---- Miniterm for MicroPython REPL
-    Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
-    Paste: CTRL + U | Kill main.py: CTRL + [
+Miniterm for MicroPython REPL
+    Ctrl-Z - Quit
+    Ctrl-N - Help
+    Ctrl-X - Kill main.py
+    Ctrl-Y - Serial Info
+    Ctrl-L - Run last file
+    Ctrl-R - Run local file
+    Ctrl-T - Run board file
+    Ctrl-G - Run clipboard code
 
 >>> help()
 Welcome to MicroPython on the ESP32!
@@ -109,11 +115,55 @@ For generic online docs please visit http://docs.micropython.org/
 ```
 #### `repl`模式快捷键
 
-* <kbd>ctrl</kbd> + <kbd>]</kbd>：退出`repl`
-* <kbd>ctrl</kbd> + <kbd>[</kbd>：一键删除`main.py`文件
-* <kbd>ctrl</kbd> + <kbd>u</kbd>：将剪贴板中的代码粘贴到`repl`中
-* <kbd>ctrl</kbd> + <kbd>l</kbd>：显示串口相关设置
-* <kbd>ctrl</kbd> + <kbd>o</kbd>：显示快捷键说明
+* <kbd>Ctrl</kbd> + <kbd>Z</kbd>：退出`repl`
+* <kbd>Ctrl</kbd> + <kbd>X</kbd>：一键删除`main.py`文件
+* <kbd>Ctrl</kbd> + <kbd>G</kbd>：将剪贴板中的代码粘贴到`repl`中
+* <kbd>Ctrl</kbd> + <kbd>Y</kbd>：显示串口相关设置
+* <kbd>Ctrl</kbd> + <kbd>O</kbd>：显示快捷键说明
+* <kbd>Ctrl</kbd> + <kbd>R</kbd>：运行本地文件
+* <kbd>Ctrl</kbd> + <kbd>T</kbd>：运行远程文件
+* <kbd>Ctrl</kbd> + <kbd>L</kbd>：再次运行上次上一次的本地文件
+
+#### 一键删除`main.py`文件
+
+有些时候由于在代码中写入死循环，导致无法删除或者重新上传文件的情况，可以尝试使用快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>对`main.py`文件进行删除
+
+#### 运行`.py`文件
+
+使用快捷键<kbd>Ctrl</kbd> + <kbd>R</kbd>可以运行本地文件
+
+```docs
+>>> Run local file
+    [1] upload_to_pypi.py
+    [2] setup.py
+    [3] local.py
+    [4] ab\__main__.py
+    [5] ab\__init__.py
+    [6] ab\pyboard.py
+    [7] ab\miniterm.py
+Choose a file: 3
+
+boot.py - FILE
+client - PATH
+drivers - PATH
+onboard.py - FILE
+
+this is a local py file
+>>>
+```
+
+使用快捷键<kbd>Ctrl</kbd> + <kbd>T</kbd>可以运行开发板上的文件
+
+```docs
+Run onboard file
+    [1] /boot.py
+    [2] /drivers/ssd1306.py
+    [3] /onboard.py
+Choose a file: 3
+
+this is a onboard py file
+>>>
+```
 
 ### 参数说明
 
@@ -125,6 +175,8 @@ For generic online docs please visit http://docs.micropython.org/
 * `--readme`：在网页中显示使用说明
 
 ### `repl`快捷键汇总
+
+排除掉`MicroPython`已经使用的，以及与各种编辑器和终端发生冲突的，而且只能使用字母键，所以实际可用的按键其实并不多，凑合选择了一组，就是现在使用的这些
 
 ```bash
 # 不可用的
@@ -151,20 +203,20 @@ Ctrl +:
 
 # 目前使用的调整后
 Ctrl +:
-	Q - quit
-	K - delete onboard file main.py
-	H - show help
-	F - show serial port info
-	1 - run local pyfile
-	2 - run code in clipboard
-	3 - run onboard pyfile
-	~ - run last pyfile (local / onboard)
+	Z - quit
+	X - delete onboard file main.py
+	N - show help
+	Y - show serial port info
+	L - run last pyfile (local / onboard)
+	R - run local pyfile
+	T - run onboard pyfile
+	G - run code in clipboard
 
-# 可用的
+# 可用的 (闲置的)
 Ctrl +:
-	F
+	F - vsc 冲突
 	G
-	H
+	H - bs 冲突
 	K
 	N
 	Q
