@@ -124,6 +124,65 @@ For generic online docs please visit http://docs.micropython.org/
 * `--repl`：进入`repl`模式
 * `--readme`：在网页中显示使用说明
 
+### `repl`快捷键汇总
+
+```bash
+# 不可用的
+Ctrl +:
+	A - raw repl mode
+	B - soft reset / exit raw repl
+	C - interrupt run / cancel paste mode
+	D - soft reset / finish paste mode
+	E - paste mode
+	I - list imported modules
+	J, M - enter key
+	P - up key
+	V - mostly paste
+
+# 目前使用的
+Ctrl +:
+	L - show serial port info
+	O - show help
+	R - run local pyfile
+	T - run onboard pyfile
+	U - run code in clipboard
+	] - quit
+	[ - delete onboard file main.py
+
+# 目前使用的调整后
+Ctrl +:
+	Q - quit
+	K - delete onboard file main.py
+	H - show help
+	F - show serial port info
+	1 - run local pyfile
+	2 - run code in clipboard
+	3 - run onboard pyfile
+	~ - run last pyfile (local / onboard)
+
+# 可用的
+Ctrl +:
+	F
+	G
+	H
+	K
+	N
+	Q
+	S
+	W
+	X
+	Y
+	Z
+	0 ~ 9
+	;
+	'
+	,
+	.
+	/
+	\
+	`
+```
+
 ### 已知问题
 
 1. ~~调用`ampy`工具新建文件夹的时候如果文件夹已存在，则会抛出异常且无法捕捉~~
