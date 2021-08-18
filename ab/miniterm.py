@@ -25,6 +25,45 @@ from serial.tools import hexlify_codec
 
 codecs.register(lambda c: hexlify_codec.getregentry() if c == 'hexlify' else None)
 
+command_list_onboard_files = \
+b'''
+import os,sys
+file_list=[]
+def list_files(root='/'):
+  files=[]
+  for dir in os.listdir(root):
+    fullpath = ('' if root=='/' else root)+'/'+dir
+    if os.stat(fullpath)[0] & 0x4000 != 0:
+      files.extend(list_files(fullpath))
+    else:
+      if dir.endswith('.py'):
+        files.append(fullpath)
+  return files
+file_list = list_files()
+print('')
+if len(file_list)>0:
+  print('Run onboard file')
+  for index,file in enumerate(file_list,start=1):
+    print('[{}] {}'.format(index, file))
+  selected=None
+  while True:
+    try:
+      selected=int(input('Choose a file: '))
+      print('')
+      assert type(selected) is int and 0 < selected <= len(file_list)
+      break
+    except KeyboardInterrupt:
+      print('')
+      break
+    except:
+      pass
+  #print(file_list[selected-1])
+  if selected:
+    exec(open(file_list[selected-1]).read(), globals())
+else:
+  print('No py file on board')
+'''
+
 try:
     raw_input
 except NameError:
@@ -41,6 +80,43 @@ def key_description(character):
     else:
         return repr(character)
 
+def get_local_pyfile():
+    def list_files(root='.', levels=2):
+        files = []
+        if levels == 0:
+            return files
+
+        for dir in os.listdir(root):
+            fullpath = os.path.join(root, dir)
+            if os.path.isdir(fullpath):
+                files.extend(list_files(fullpath, levels - 1))
+            else:
+                if fullpath.endswith('.py'):
+                    files.append(fullpath.replace('.\\', ''))
+
+        return files
+
+    file_list = list(reversed(list_files()))
+
+    if len(file_list) > 0:
+        print('\nRun local file')
+        for index, file in enumerate(file_list, start=1):
+            print(f'[{index}] {file}')
+
+        selected = None
+        while True:
+            try:
+                selected = int(input('Choose a file: '))
+                assert type(selected) is int and 0 < selected <= len(file_list)
+                break
+            except EOFError:
+                return
+            except:
+                pass
+
+        return file_list[selected - 1]
+    else:
+        print('\nNo local py file')
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 class ConsoleBase(object):
@@ -385,6 +461,7 @@ class Miniterm(object):
                     break
                 elif c == self.exit_character:
                     self.stop()             # exit app
+                    os._exit(0)
                     break
                 elif c == unichr(0x0c):     # CTRL + L
                     self.dump_port_settings()
@@ -402,29 +479,51 @@ class Miniterm(object):
                     clip.CloseClipboard()
                     self.serial.write(b'\x04')
                 elif c == unichr(0x1b):     # CTRL + [
-                    self.serial.write(b'\x05\r')
-                    self.serial.write(b'import os\rtry:\r  os.remove("main.py")\rexcept:\r  pass\r')
-                    self.serial.write(b'\x04\x04')
-                    self.serial.flush()
-                elif c == unichr(0x12):     # CTRL + R
                     self._pause_reader = True
-                    self.serial.write(b"\r\x01")
-
-                    with open('fontlib.py', 'rb') as file:
-                        pyfile = file.read()
-
-                    for i in range(0, len(pyfile), 256):
-                        self.serial.write(pyfile[i : min(i + 256, len(pyfile))])
-                        time.sleep(0.01)
-
-                    self.serial.write(b"\x04")
-
+                    self.serial.write(b"\x05")
+                    self.serial.write(b'import os\rtry:\r  os.remove("main.py")\rexcept:\r  pass\r')
+                    self.serial.write(b'\x04')
                     time.sleep(0.2)
-                    self.console.write_bytes(b'\r\n')
                     self._pause_reader = False
-                    self.serial.write(b"\r\x02")
+                    self.serial.write(b'\x04')
+                elif c == unichr(0x12):     # CTRL + R
+                    pyfile = get_local_pyfile()
+                    
+                    if pyfile:
+                        with open(pyfile, 'rb') as file:
+                            pyfile = file.read()
+    
+                        self._pause_reader = True
+                        time.sleep(0.02)
+                        self.serial.write(b"\x01")
+                        time.sleep(0.02)
+
+                        for i in range(0, len(pyfile), 256):
+                            self.serial.write(pyfile[i : min(i + 256, len(pyfile))])
+                            time.sleep(0.01)
+
+                        self.serial.write(b"\x04")
+                        time.sleep(0.02)
+                        self.serial.read_all()
+                        self._pause_reader = False
+                        time.sleep(0.02)
+                        self.console.write_bytes(b'\r\n')
+                        self.serial.write(b"\x02")
+                        time.sleep(0.02)
+                    else:
+                        time.sleep(0.02)
+                        self.console.write_bytes(b'\r\n')
+                        self.serial.write(b"\x04")
+                        time.sleep(0.02)
                 elif c == unichr(0x14):     # CTRL +T
-                    self.serial.write(b'exec(open("onboard.py").read(), globals())\r\n')
+                    self._pause_reader = True
+                    self.serial.write(b'\x05') # b"\x05A\x01"
+                    for i in range(0, len(command_list_onboard_files), 256):
+                        self.serial.write(command_list_onboard_files[i : min(i + 256, len(command_list_onboard_files))])
+                        time.sleep(0.01)
+                    self.serial.write(b"\x04")
+                    time.sleep(0.2)
+                    self._pause_reader = False
                 else:
                     #~ if self.raw:
                     text = c
