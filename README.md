@@ -128,9 +128,9 @@ For generic online docs please visit http://docs.micropython.org/
 
 有些时候由于在代码中写入死循环，导致无法删除或者重新上传文件的情况，可以尝试使用快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>对`main.py`文件进行删除
 
-#### 运行`.py`文件
+#### 运行本地`.py`文件
 
-使用快捷键<kbd>Ctrl</kbd> + <kbd>R</kbd>可以运行本地文件
+快捷键为：<kbd>Ctrl</kbd> + <kbd>R</kbd>
 
 ```docs
 >>> Run local file
@@ -152,9 +152,12 @@ this is a local py file
 >>>
 ```
 
-使用快捷键<kbd>Ctrl</kbd> + <kbd>T</kbd>可以运行开发板上的文件
+#### 运行远程`py`文件
+
+也就是运行开发板上的文件，快捷键为：<kbd>Ctrl</kbd> + <kbd>T</kbd>
 
 ```docs
+>>>
 Run onboard file
     [1] /boot.py
     [2] /drivers/ssd1306.py
@@ -165,6 +168,35 @@ this is a onboard py file
 >>>
 ```
 
+#### 运行剪贴板中的代码段
+
+快捷键为：<kbd>Ctrl</kbd> + <kbd>G</kbd>
+
+> 需要注意复制的代码段的缩进
+
+```docs
+>>> Run clipboard code
+
+HZK Info: //client/combined.bin
+    file size : 303520
+  font height : 16
+    data size : 32
+    scan mode : Horizontal
+   byte order : LSB
+   characters : 8932
+
+slave id: 60
+>>>
+```
+
+#### 重新运行之前的文件
+
+快捷键为：<kbd>Ctrl</kbd> + <kbd>L</kbd>
+
+> 注意：只能重新运行上一次的**本地文件**
+>
+> 因为开发板上文件的运行方式不同，所以暂不支持一键重新运行
+
 ### 参数说明
 
 * `-h`：显示使用说明
@@ -174,7 +206,40 @@ this is a onboard py file
 * `--repl`：进入`repl`模式
 * `--readme`：在网页中显示使用说明
 
-### `repl`快捷键汇总
+### 已知问题
+
+1. ~~调用`ampy`工具新建文件夹的时候如果文件夹已存在，则会抛出异常且无法捕捉~~
+
+2. 偶尔出现无法进入`raw_repl`模式的问题，重新运行一次即可解决
+
+### 更新记录
+
+* `v0.5`：
+	* 调整了`repl`模式下的快捷键
+	* `repl`模式增加运行本地文件功能
+	* `repl`模式增加运行远程文件功能
+	* 美化`repl`模式提示内容
+* `v0.4.2`：`repl`模式增加一键删除`main.py`文件功能
+* `v0.4.1`：`repl`模式增加粘贴代码功能
+* `v0.4`：增加进入`repl`模式菜单和相关功能
+* `v0.3.2`：修复由于`v0.3.1`导致的分隔路径错误问题
+* `v0.3.1`：修复上传文件时字符转义的问题
+* `v0.3`：
+	* 重构了获取所有文件和文件夹列表功能
+	* 增加了显示网页版使用说明的参数
+	* `enter_raw_repl()`中增加延时，尝试解决`已知问题2`
+
+* `v0.2.2`：修复某些开发板不能读取串口数据的问题（如`安信可 ESP32C3 系列开发板`）
+* `v0.2.1`：修复导入模块路径问题
+* `v0.2`：
+	* 使用 [pyboard.py](https://github.com/micropython/micropython/blob/master/tools/pyboard.py) 替代`ampy`以提升文件上传效率，并解决`已知问题 1`
+	* 禁用了代码压缩功能，使用 [pyminifier](http://liftoff.github.io/pyminifier/index.html) 压缩代码会出现问题
+	* 删除指定临时目录参数
+
+* `v0.1.1`：尝试上传到 [PyPI](https://pypi.org/)
+* `v0.1`：完成基本功能
+
+### 附录：`repl`快捷键汇总
 
 排除掉`MicroPython`已经使用的，以及与各种编辑器和终端发生冲突的，而且只能使用字母键，所以实际可用的按键其实并不多，凑合选择了一组，就是现在使用的这些
 
@@ -191,7 +256,7 @@ Ctrl +:
 	P - up key
 	V - mostly paste
 
-# 目前使用的
+# 之前使用的
 Ctrl +:
 	L - show serial port info
 	O - show help
@@ -201,7 +266,7 @@ Ctrl +:
 	] - quit
 	[ - delete onboard file main.py
 
-# 目前使用的调整后
+# 现在使用的
 Ctrl +:
 	Z - quit
 	X - delete onboard file main.py
@@ -225,43 +290,7 @@ Ctrl +:
 	X
 	Y
 	Z
-	0 ~ 9
-	;
-	'
-	,
-	.
-	/
-	\
-	`
 ```
-
-### 已知问题
-
-1. ~~调用`ampy`工具新建文件夹的时候如果文件夹已存在，则会抛出异常且无法捕捉~~
-
-2. 偶尔出现无法进入`raw_repl`模式的问题，重新运行一次即可解决
-
-### 更新记录
-
-* `v0.4.2`：`repl`模式增加一键删除`main.py`文件功能
-* `v0.4.1`：`repl`模式增加粘贴代码功能
-* `v0.4`：增加进入`repl`模式菜单和相关功能
-* `v0.3.2`：修复由于`v0.3.1`导致的分隔路径错误问题
-* `v0.3.1`：修复上传文件时字符转义的问题
-* `v0.3`：
-	* 重构了获取所有文件和文件夹列表功能
-	* 增加了显示网页版使用说明的参数
-	* `enter_raw_repl()`中增加延时，尝试解决`已知问题2`
-
-* `v0.2.2`：修复某些开发板不能读取串口数据的问题（如`安信可 ESP32C3 系列开发板`）
-* `v0.2.1`：修复导入模块路径问题
-* `v0.2`：
-	* 使用 [pyboard.py](https://github.com/micropython/micropython/blob/master/tools/pyboard.py) 替代`ampy`以提升文件上传效率，并解决`已知问题 1`
-	* 禁用了代码压缩功能，使用 [pyminifier](http://liftoff.github.io/pyminifier/index.html) 压缩代码会出现问题
-	* 删除指定临时目录参数
-
-* `v0.1.1`：尝试上传到 [PyPI](https://pypi.org/)
-* `v0.1`：完成基本功能
 
 ### 合作交流
 
