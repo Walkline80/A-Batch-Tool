@@ -97,9 +97,15 @@ Port List:
     [2] COM1 - 通信端口 (COM1)
 Choose a port: 1
 
---- Miniterm for MicroPython REPL
-    Quit: CTRL + ] | Info: CTRL + L | Help: CTRL + O
-    Paste: CTRL + U | Kill main.py: CTRL + [
+Miniterm for MicroPython REPL
+    Ctrl-Z - Quit
+    Ctrl-N - Help
+    Ctrl-X - Kill main.py
+    Ctrl-Y - Serial Info
+    Ctrl-L - Run last file
+    Ctrl-R - Run local file
+    Ctrl-T - Run board file
+    Ctrl-G - Run clipboard code
 
 >>> help()
 Welcome to MicroPython on the ESP32!
@@ -109,11 +115,87 @@ For generic online docs please visit http://docs.micropython.org/
 ```
 #### `repl`模式快捷键
 
-* <kbd>ctrl</kbd> + <kbd>]</kbd>：退出`repl`
-* <kbd>ctrl</kbd> + <kbd>[</kbd>：一键删除`main.py`文件
-* <kbd>ctrl</kbd> + <kbd>u</kbd>：将剪贴板中的代码粘贴到`repl`中
-* <kbd>ctrl</kbd> + <kbd>l</kbd>：显示串口相关设置
-* <kbd>ctrl</kbd> + <kbd>o</kbd>：显示快捷键说明
+* <kbd>Ctrl</kbd> + <kbd>Z</kbd>：退出`repl`
+* <kbd>Ctrl</kbd> + <kbd>X</kbd>：一键删除`main.py`文件
+* <kbd>Ctrl</kbd> + <kbd>G</kbd>：将剪贴板中的代码粘贴到`repl`中
+* <kbd>Ctrl</kbd> + <kbd>Y</kbd>：显示串口相关设置
+* <kbd>Ctrl</kbd> + <kbd>O</kbd>：显示快捷键说明
+* <kbd>Ctrl</kbd> + <kbd>R</kbd>：运行本地文件
+* <kbd>Ctrl</kbd> + <kbd>T</kbd>：运行远程文件
+* <kbd>Ctrl</kbd> + <kbd>L</kbd>：再次运行上次上一次的本地文件
+
+#### 一键删除`main.py`文件
+
+有些时候由于在代码中写入死循环，导致无法删除或者重新上传文件的情况，可以尝试使用快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>对`main.py`文件进行删除
+
+#### 运行本地`.py`文件
+
+快捷键为：<kbd>Ctrl</kbd> + <kbd>R</kbd>
+
+```docs
+>>> Run local file
+    [1] upload_to_pypi.py
+    [2] setup.py
+    [3] local.py
+    [4] ab\__main__.py
+    [5] ab\__init__.py
+    [6] ab\pyboard.py
+    [7] ab\miniterm.py
+Choose a file: 3
+
+boot.py - FILE
+client - PATH
+drivers - PATH
+onboard.py - FILE
+
+this is a local py file
+>>>
+```
+
+#### 运行远程`py`文件
+
+也就是运行开发板上的文件，快捷键为：<kbd>Ctrl</kbd> + <kbd>T</kbd>
+
+```docs
+>>>
+Run onboard file
+    [1] /boot.py
+    [2] /drivers/ssd1306.py
+    [3] /onboard.py
+Choose a file: 3
+
+this is a onboard py file
+>>>
+```
+
+#### 运行剪贴板中的代码段
+
+快捷键为：<kbd>Ctrl</kbd> + <kbd>G</kbd>
+
+> 需要注意复制的代码段的缩进
+
+```docs
+>>> Run clipboard code
+
+HZK Info: //client/combined.bin
+    file size : 303520
+  font height : 16
+    data size : 32
+    scan mode : Horizontal
+   byte order : LSB
+   characters : 8932
+
+slave id: 60
+>>>
+```
+
+#### 重新运行之前的文件
+
+快捷键为：<kbd>Ctrl</kbd> + <kbd>L</kbd>
+
+> 注意：只能重新运行上一次的**本地文件**
+>
+> 因为开发板上文件的运行方式不同，所以暂不支持一键重新运行
 
 ### 参数说明
 
@@ -132,6 +214,11 @@ For generic online docs please visit http://docs.micropython.org/
 
 ### 更新记录
 
+* `v0.5`：
+	* 调整了`repl`模式下的快捷键
+	* `repl`模式增加运行本地文件功能
+	* `repl`模式增加运行远程文件功能
+	* 美化`repl`模式提示内容
 * `v0.4.2`：`repl`模式增加一键删除`main.py`文件功能
 * `v0.4.1`：`repl`模式增加粘贴代码功能
 * `v0.4`：增加进入`repl`模式菜单和相关功能
@@ -151,6 +238,59 @@ For generic online docs please visit http://docs.micropython.org/
 
 * `v0.1.1`：尝试上传到 [PyPI](https://pypi.org/)
 * `v0.1`：完成基本功能
+
+### 附录：`repl`快捷键汇总
+
+排除掉`MicroPython`已经使用的，以及与各种编辑器和终端发生冲突的，而且只能使用字母键，所以实际可用的按键其实并不多，凑合选择了一组，就是现在使用的这些
+
+```bash
+# 不可用的
+Ctrl +:
+	A - raw repl mode
+	B - soft reset / exit raw repl
+	C - interrupt run / cancel paste mode
+	D - soft reset / finish paste mode
+	E - paste mode
+	I - list imported modules
+	J, M - enter key
+	P - up key
+	V - mostly paste
+
+# 之前使用的
+Ctrl +:
+	L - show serial port info
+	O - show help
+	R - run local pyfile
+	T - run onboard pyfile
+	U - run code in clipboard
+	] - quit
+	[ - delete onboard file main.py
+
+# 现在使用的
+Ctrl +:
+	Z - quit
+	X - delete onboard file main.py
+	N - show help
+	Y - show serial port info
+	L - run last pyfile (local / onboard)
+	R - run local pyfile
+	T - run onboard pyfile
+	G - run code in clipboard
+
+# 可用的 (闲置的)
+Ctrl +:
+	F - vsc 冲突
+	G
+	H - bs 冲突
+	K
+	N
+	Q
+	S
+	W
+	X
+	Y
+	Z
+```
 
 ### 合作交流
 
