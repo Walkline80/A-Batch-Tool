@@ -122,7 +122,7 @@ For generic online docs please visit http://docs.micropython.org/
 * <kbd>Ctrl</kbd> + <kbd>O</kbd>：显示快捷键说明
 * <kbd>Ctrl</kbd> + <kbd>R</kbd>：运行本地文件
 * <kbd>Ctrl</kbd> + <kbd>T</kbd>：运行远程文件
-* <kbd>Ctrl</kbd> + <kbd>L</kbd>：再次运行上次上一次的本地文件
+* <kbd>Ctrl</kbd> + <kbd>L</kbd>：再次运行上次的本地文件
 
 #### 一键删除`main.py`文件
 
