@@ -47,10 +47,6 @@ b'''
     Ctrl-G - Run clipboard code\033[0m
 '''
 
-command_list_onboard_files1 =\
-b'''
-print('hello')
-'''
 command_list_onboard_files = \
 b'''
 import os,sys
@@ -387,7 +383,7 @@ class Miniterm(object):
         sys.stderr.write('--- serial input encoding: {}\n'.format(self.input_encoding))
         sys.stderr.write('--- serial output encoding: {}\n'.format(self.output_encoding))
         sys.stderr.write('--- EOL: {}\n'.format(self.eol.upper()))
-        sys.stderr.write('--- filters: {}\n'.format(' '.join(self.filters)))
+        sys.stderr.write('--- filters: {}'.format(' '.join(self.filters)))
 
     def reader(self):
         """loop and copy serial->console"""
@@ -411,13 +407,22 @@ class Miniterm(object):
             raise       # XXX handle instead of re-raise?
 
     def send_tx_enter(self):
+        '''(新增函数)
+        发送一个模拟键盘输入的回车，用途是在换行时显示 repl 提示符前缀，也就是 >>>
+        '''
         text = unichr(10)
         for transformation in self.tx_transformations:
             text = transformation.tx(text)
         self.serial.write(self.tx_encoder.encode(text))
 
-    def get_local_pyfile(self):
+    def get_local_pyfile(self) -> str or None:
+        '''(新增函数)
+        获取用户选择的本地 py 文件，文件以列表形式供用户选择，列表文件选取范围是当前目录及 2 层子目录下的 py 文件
+        '''
         def list_files(root='.', levels=2):
+            '''
+            递归获取指定目录及默认 2 层子目录下的 py 文件
+            '''
             files = []
             if levels == 0:
                 return files
@@ -452,9 +457,13 @@ class Miniterm(object):
 
             return file_list[selected - 1]
         else:
-            self.show_tips('No local py file')
+            self.show_tips('No local py file found')
 
     def run_local_file(self, pyfile=None):
+        '''(新增函数)
+        运行指定的本地 py 文件。
+        运行方式为 repl paste 模式（ctrl-e 进入， ctrl-d 完成）
+        '''
         pyfile = self.get_local_pyfile() if pyfile is None else pyfile
 
         if pyfile:
@@ -474,23 +483,44 @@ class Miniterm(object):
             time.sleep(round(time.time() - start_time, 3))
             self.serial.write(b"\x04")
             time.sleep(0.02)
-            #self.serial.read_all()
             self._pause_reader = False
             time.sleep(0.02)
             self.console.write_bytes(b'\r\n')
-            #self.serial.write(b"\x02")
             time.sleep(0.02)
 
             self.last_run = ('local', pyfile)
-        else:
-            time.sleep(0.02)
-            self.console.write_bytes(b'\r\n')
-            self.serial.write(b"\x04")
-            time.sleep(0.02)
+
+    def run_clipboard_code(self):
+        '''(新增函数)
+        运行剪贴板中复制的代码。
+        运行方式为 repl paste 模式（ctrl-e 进入， ctrl-d 完成）
+        '''
+        self.show_title('Run clipboard code')
+        self._pause_reader = True
+        time.sleep(0.02)
+        self.serial.write(b'\x05')
+        clip.OpenClipboard()
+        for line in clip.GetClipboardData().split('\r\n'):
+            if line.strip('\t').startswith('#'):
+                continue
+            self.serial.write(line.replace('\t', '    ').encode() + b'\r')
+            self.serial.flush()
+            time.sleep(0.002)
+        clip.CloseClipboard()
+        self.serial.write(b'\x04')
+        time.sleep(0.02)
+        self._pause_reader = False
+        time.sleep(0.02)
+        self.console.write_bytes(b'\r\n')
+        time.sleep(0.02)
 
     def run_board_file(self):
+        '''(新增函数)
+        运行指定的远程（开发板） py 文件，开发板上的目录结构相对简单所以会列出所有目录下的 py 文件。
+        运行方式为 repl paste 模式（ctrl-e 进入， ctrl-d 完成）
+        '''
         self._pause_reader = True
-        self.serial.write(b'\x05') # b"\x05A\x01"
+        self.serial.write(b'\x05')
         start_time = time.time()
         for i in range(0, len(command_list_onboard_files), 256):
             self.serial.write(command_list_onboard_files[i : min(i + 256, len(command_list_onboard_files))])
@@ -500,12 +530,17 @@ class Miniterm(object):
 
         self.serial.write(b"\x04")
         self._pause_reader = False
-        # time.sleep(0.2)
 
     def show_title(self, title):
+        '''(新增函数)
+        打印蓝色的 title 字符串
+        '''
         self.console.write('\033[1;36m{}\033[0m\n'.format(title))
 
     def show_tips(self, tips):
+        '''(新增函数)
+        打印黄色的 tips 字符串，并发送 repl 换行
+        '''
         self.console.write('\033[1;33m{}\033[0m'.format(tips))
         self.send_tx_enter()
 
@@ -534,17 +569,9 @@ class Miniterm(object):
                     self.console.write_bytes(help)
                     self.send_tx_enter()
                 elif c == unichr(0x07):     # CTRL + G
-                    self.serial.write(b'\x05\r') # b"\x05A\x01"
-                    clip.OpenClipboard()
-                    for line in clip.GetClipboardData().split('\r\n'):
-                        if line.strip('\t').startswith('#'):
-                            continue
-                        self.serial.write(line.replace('\t', '    ').encode() + b'\r')
-                        self.serial.flush()
-                        time.sleep(0.001)
-                    clip.CloseClipboard()
-                    self.serial.write(b'\x04')
+                    self.run_clipboard_code()
                 elif c == unichr(0x18):     # CTRL + X
+                    # 一键删除开发板 main.py 文件
                     self._pause_reader = True
                     self.serial.write(b"\x05")
                     self.serial.write(b'import os\rtry:\r  os.remove("main.py")\rexcept:\r  pass\r')
@@ -564,15 +591,12 @@ class Miniterm(object):
                             self.run_local_file(pyfile)
                         elif site == 'board':
                             self.run_board_file(pyfile)
+                        elif site == 'clipboard':
+                            self.run_clipboard_code()
                         else:
-                            self.console.write('Unknown last code identity')
-                            self.send_tx_enter()
+                            self.show_tips('Unknown last code identity')
                     else:
                         self.show_tips('Not run code yet')
-                elif c == unichr(0x61):     # CTRL + F4
-                    color = b"\x1B\x5B\x30\x3B\x33\x32\x6DI'm green\x1B\x5B\x30\x6D"
-                    self.console.write_bytes(color)
-                    self.send_tx_enter()
                 else:
                     #~ if self.raw:
                     text = c
@@ -617,8 +641,6 @@ def main(default_port=None, default_baudrate=115200, default_rts=False, default_
             break
 
     miniterm = Miniterm(serial_instance)
-    # miniterm.exit_character = unichr(0x1d)
-    # miniterm.menu_character = unichr(0x14)
     miniterm.raw = False
     miniterm.set_rx_encoding('UTF-8')
     miniterm.set_tx_encoding('UTF-8')
@@ -634,5 +656,4 @@ def main(default_port=None, default_baudrate=115200, default_rts=False, default_
     miniterm.close()
 
 if __name__ == '__main__':
-    # show_help()
     main()
