@@ -298,11 +298,11 @@ Ctrl +:
 	Z
 ```
 
-### 合作交流
+### 合作及交流
 
 * 联系邮箱：<walkline@163.com>
 * QQ 交流群：
-	* 走线物联：163271910
-	* 扇贝物联：31324057
+	* 走线物联：[163271910](https://jq.qq.com/?_wv=1027&k=VlT7Bjs9)
+	* 扇贝物联：[31324057](https://jq.qq.com/?_wv=1027&k=IQh2OLw9)
 
 <p align="center"><img src="https://gitee.com/walkline/WeatherStation/raw/docs/images/qrcode_walkline.png" width="300px" alt="走线物联"><img src="https://gitee.com/walkline/WeatherStation/raw/docs/images/qrcode_bigiot.png" width="300px" alt="扇贝物联"></p>
