@@ -88,7 +88,7 @@ $ pip install -e .
 	Upload Finished
 	```
 
-### 如何进入`repl`模式
+### REPL 模式使用说明
 
 ```bash
 $ ab --repl
@@ -126,7 +126,7 @@ For generic online docs please visit http://docs.micropython.org/
 
 #### 一键删除`main.py`文件
 
-有些时候由于在代码中写入死循环，导致无法删除或者重新上传文件的情况，可以尝试使用快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>对`main.py`文件进行删除
+有些时候由于在代码中写入死循环，导致无法删除或者重新上传文件的情况，可以尝试使用这个功能，快捷键为：<kbd>Ctrl</kbd> + <kbd>X</kbd>
 
 #### 运行本地`.py`文件
 
@@ -152,7 +152,7 @@ this is a local py file
 >>>
 ```
 
-#### 运行远程`py`文件
+#### 运行远程`.py`文件
 
 也就是运行开发板上的文件，快捷键为：<kbd>Ctrl</kbd> + <kbd>T</kbd>
 
@@ -255,7 +255,9 @@ Ctrl +:
 	J, M - enter key
 	P - up key
 	V - mostly paste
+```
 
+```bash
 # 之前使用的
 Ctrl +:
 	L - show serial port info
@@ -265,7 +267,9 @@ Ctrl +:
 	U - run code in clipboard
 	] - quit
 	[ - delete onboard file main.py
+```
 
+```bash
 # 现在使用的
 Ctrl +:
 	Z - quit
@@ -276,7 +280,9 @@ Ctrl +:
 	R - run local pyfile
 	T - run onboard pyfile
 	G - run code in clipboard
+```
 
+```bash
 # 可用的 (闲置的)
 Ctrl +:
 	F - vsc 冲突
