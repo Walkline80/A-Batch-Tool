@@ -35,17 +35,22 @@ $ pip install -e .
 
 * 在你的项目文件夹下新建`abconfig`文件（`ab`工具默认查找该配置文件，也可以手动指定其它文件）
 
-* 配置文件中填写需要上传的文件夹或文件，每行一个，以`#`号开头的行表示需要排除的文件夹或文件，例如：
+* 配置文件中填写需要上传的文件夹或文件，每行一个，例如：
 
 	```doc
 	drivers/
-	services/
+	!test.py
 	main.py
+	!services/
 	not_exists/
 
-	# services/websocket.py
+	#services/websocket.py
 	# .git/
 	```
+
+	> 以`#`号开头的行：上传时排除的文件夹或文件
+	> 以`!`号开头的行：在`repl`模式下上传文件后立即运行的文件
+
 * 在需要上传项目文件的时候执行如下命令即可
 
 	```bash
@@ -123,6 +128,7 @@ For generic online docs please visit http://docs.micropython.org/
 * <kbd>Ctrl</kbd> + <kbd>R</kbd>：运行本地文件
 * <kbd>Ctrl</kbd> + <kbd>T</kbd>：运行远程文件
 * <kbd>Ctrl</kbd> + <kbd>L</kbd>：再次运行上次的本地文件
+* <kbd>Ctrl</kbd> + <kbd>U</kbd>：上传配置文件中指定的文件
 
 #### 一键删除`main.py`文件
 
@@ -197,6 +203,10 @@ slave id: 60
 >
 > 因为开发板上文件的运行方式不同，所以暂不支持一键重新运行
 
+#### 上传配置文件中指定的文件
+
+省去每次上传文件都要退出`repl`模式的麻烦，快捷键为：<kbd>Ctrl</kbd> + <kbd>U</kbd>
+
 ### 参数说明
 
 * `-h`：显示使用说明
@@ -214,6 +224,7 @@ slave id: 60
 
 ### 更新记录
 
+* `v0.6`：增加在`repl`模式下直接上传文件的功能
 * `v0.5`：
 	* 调整了`repl`模式下的快捷键
 	* `repl`模式增加运行本地文件功能
@@ -280,22 +291,18 @@ Ctrl +:
 	R - run local pyfile
 	T - run onboard pyfile
 	G - run code in clipboard
+	U - upload files to board
 ```
 
 ```bash
 # 可用的 (闲置的)
 Ctrl +:
 	F - vsc 冲突
-	G
 	H - bs 冲突
-	K
-	N
-	Q
-	S
-	W
-	X
-	Y
-	Z
+	K - vsc 冲突
+	Q - vsc 冲突
+	S - vsc 冲突
+	W - cmder 冲突
 ```
 
 ### 合作及交流
