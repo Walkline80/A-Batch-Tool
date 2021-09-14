@@ -44,7 +44,8 @@ b'''
     Ctrl-L - Run last file
     Ctrl-R - Run local file
     Ctrl-T - Run board file
-    Ctrl-G - Run clipboard code\033[0m
+    Ctrl-G - Run clipboard code
+    Ctrl-U - Upload files to board\033[0m
 '''
 
 command_list_onboard_files = \
