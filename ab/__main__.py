@@ -3,15 +3,15 @@ The MIT License (MIT)
 Copyright © 2021 Walkline Wang (https://walkline.wang)
 Gitee: https://gitee.com/walkline/a-batch-tool
 """
-from optparse import OptionParser, OptionGroup
+from optparse import OptionParser
 from serial.tools.list_ports import comports
-import os, sys
+import os
 import shutil, tempfile
 
 try:
-	from pyboard import Pyboard, PyboardError, ProcessToSerial, stdout_write_bytes
+	from pyboard import Pyboard, stdout_write_bytes
 except ModuleNotFoundError:
-	from .pyboard import Pyboard, PyboardError, ProcessToSerial, stdout_write_bytes
+	from .pyboard import Pyboard, stdout_write_bytes
 
 try:
 	from __init__ import __version__
@@ -20,7 +20,8 @@ except ModuleNotFoundError:
 
 
 DEFAULT_CONFIG_FILE = 'abconfig'
-EXCLUDE_PREFIX = '# '
+EXCLUDE_PREFIX = '#'
+RUN_AFTER_UPLOAD_PREFIX = '!'
 
 CMD_MKDIRS = \
 '''
@@ -109,6 +110,7 @@ def choose_a_port():
 def parse_config_file(config_file):
 	includes = []
 	excludes = []
+	run_file = None
 
 	with open(config_file, 'r') as config:
 		lines = config.read().splitlines()
@@ -116,11 +118,15 @@ def parse_config_file(config_file):
 	for line in lines:
 		if line:
 			if line.startswith(EXCLUDE_PREFIX):
-				excludes.append(os.path.normpath(line.strip(EXCLUDE_PREFIX + '/\\')))
+				excludes.append(os.path.normpath(line.strip(EXCLUDE_PREFIX + '/\\').strip()))
+			elif line.startswith(RUN_AFTER_UPLOAD_PREFIX):
+				run_file = os.path.normpath(line.strip(RUN_AFTER_UPLOAD_PREFIX + '/\\').strip())
+				includes.append(run_file)
+				if run_file == 'main.py': run_file = None
 			else:
 				includes.append(os.path.normpath(line.strip('/\\')))
 
-	return includes, excludes
+	return includes, excludes, run_file
 
 def ab(options, files):
 	global parser
@@ -134,7 +140,7 @@ def ab(options, files):
 	if options.simulate:
 		options.quiet = False
 
-	includes, excludes = parse_config_file(config_file)
+	includes, excludes, _ = parse_config_file(config_file)
 	include_files, include_dirs, bad_list = list_all_files_and_dirs(includes, excludes)
 
 	if not include_files:
