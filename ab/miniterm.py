@@ -656,8 +656,9 @@ class Miniterm(object):
 
                     if run_file in include_files:
                         time.sleep(0.2)
-                        self.show_title('\nRun onboard file: {}'.format(run_file))
+                        self.show_title('Run onboard file: {}'.format(run_file))
                         exec(open(run_file).read(), globals())
+                        self.run_board_file(b'\n')
                 elif c == unichr(0x0c):     # CTRL + L
                     if self.last_run:
                         site, pyfile = self.last_run
