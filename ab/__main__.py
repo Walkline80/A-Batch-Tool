@@ -120,10 +120,10 @@ def parse_config_file(config_file):
 			if line.startswith(EXCLUDE_PREFIX):
 				excludes.append(os.path.normpath(line.strip(EXCLUDE_PREFIX + '/\\').strip()))
 			elif line.startswith(RUN_AFTER_UPLOAD_PREFIX):
-				run_file = os.path.normpath(line.strip(RUN_AFTER_UPLOAD_PREFIX + '/\\').strip())
-				includes.append(run_file)
-				
-				if not os.path.exists(run_file) or os.path.isdir(run_file) or run_file == 'main.py': run_file = None
+				run_file_temp = os.path.normpath(line.strip(RUN_AFTER_UPLOAD_PREFIX + '/\\').strip())
+				includes.append(run_file_temp)
+
+				if os.path.exists(run_file_temp) and not os.path.isdir(run_file_temp) and run_file_temp != 'main.py': run_file = run_file_temp
 			else:
 				includes.append(os.path.normpath(line.strip('/\\')))
 
