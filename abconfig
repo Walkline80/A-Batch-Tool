@@ -1,7 +1,8 @@
 drivers/
-services/
+!test.py
 main.py
+!services/
 not_exists/
 
-# services/websocket.py
+#services/websocket.py
 # .git/

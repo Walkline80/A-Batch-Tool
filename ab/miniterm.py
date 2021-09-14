@@ -21,7 +21,6 @@ import win32clipboard as clip
 
 
 import serial
-from serial.tools.list_ports import comports
 from serial.tools import hexlify_codec
 
 # pylint: disable=wrong-import-order,wrong-import-position
@@ -33,6 +32,7 @@ ANSI_COLOR_GREEN = b'\x1b[32m'
 ANSI_COLOR_RESET = b'\x1b[0m'
 ANSI_UNDERLINE = b'\033[4m'
 ANSI_CLOSE = b'\033[0m'
+ABCONFIG_FILE_PREFIX = 'abc'
 
 help = \
 b'''
@@ -44,7 +44,8 @@ b'''
     Ctrl-L - Run last file
     Ctrl-R - Run local file
     Ctrl-T - Run board file
-    Ctrl-G - Run clipboard code\033[0m
+    Ctrl-G - Run clipboard code
+    Ctrl-U - Upload files to board\033[0m
 '''
 
 command_list_onboard_files = \
@@ -415,29 +416,33 @@ class Miniterm(object):
             text = transformation.tx(text)
         self.serial.write(self.tx_encoder.encode(text))
 
+    def list_files(self, root='.', levels=2, for_py=True):
+        '''
+        递归获取指定目录及默认 2 层子目录下的 py 文件
+        '''
+        files = []
+        if levels == 0:
+            return files
+
+        for dir in os.listdir(root):
+            fullpath = os.path.join(root, dir)
+            if os.path.isdir(fullpath):
+                files.extend(self.list_files(fullpath, levels - 1))
+            else:
+                if for_py:
+                    if fullpath.endswith('.py'):
+                        files.append(fullpath.replace('.\\', ''))
+                else:
+                    if fullpath.split('\\')[-1].startswith(ABCONFIG_FILE_PREFIX):
+                        files.append(fullpath.replace('.\\', ''))
+
+        return files
+
     def get_local_pyfile(self) -> str or None:
         '''(新增函数)
         获取用户选择的本地 py 文件，文件以列表形式供用户选择，列表文件选取范围是当前目录及 2 层子目录下的 py 文件
         '''
-        def list_files(root='.', levels=2):
-            '''
-            递归获取指定目录及默认 2 层子目录下的 py 文件
-            '''
-            files = []
-            if levels == 0:
-                return files
-
-            for dir in os.listdir(root):
-                fullpath = os.path.join(root, dir)
-                if os.path.isdir(fullpath):
-                    files.extend(list_files(fullpath, levels - 1))
-                else:
-                    if fullpath.endswith('.py'):
-                        files.append(fullpath.replace('.\\', ''))
-
-            return files
-
-        file_list = list(reversed(list_files()))
+        file_list = list(reversed(self.list_files()))
 
         if len(file_list) > 0:
             self.show_title('Run local file')
@@ -451,6 +456,7 @@ class Miniterm(object):
                     assert type(selected) is int and 0 < selected <= len(file_list)
                     break
                 except EOFError:
+                    self.run_board_file(b'\n')
                     return
                 except:
                     pass
@@ -514,7 +520,7 @@ class Miniterm(object):
         self.console.write_bytes(b'\r\n')
         time.sleep(0.02)
 
-    def run_board_file(self):
+    def run_board_file(self, onboard_code=command_list_onboard_files):
         '''(新增函数)
         运行指定的远程（开发板） py 文件，开发板上的目录结构相对简单所以会列出所有目录下的 py 文件。
         运行方式为 repl paste 模式（ctrl-e 进入， ctrl-d 完成）
@@ -522,14 +528,25 @@ class Miniterm(object):
         self._pause_reader = True
         self.serial.write(b'\x05')
         start_time = time.time()
-        for i in range(0, len(command_list_onboard_files), 256):
-            self.serial.write(command_list_onboard_files[i : min(i + 256, len(command_list_onboard_files))])
+        for i in range(0, len(onboard_code), 256):
+            self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
             time.sleep(0.02)
 
         time.sleep(round(time.time() - start_time, 3))
 
         self.serial.write(b"\x04")
         self._pause_reader = False
+
+    def put_file(self, src, dest):
+        self.run_board_file(bytes("f=open('%s','wb')\nw=f.write" % dest, 'utf-8'))
+
+        with open(src, "rb") as f:
+            while True:
+                data = f.read(256)
+                if not data:
+                    break
+                self.run_board_file(bytes("w(" + repr(data) + ")", 'utf-8'))
+        self.run_board_file(b"f.close()")
 
     def show_title(self, title):
         '''(新增函数)
@@ -583,6 +600,66 @@ class Miniterm(object):
                     self.run_local_file()
                 elif c == unichr(0x14):     # CTRL + T
                     self.run_board_file()
+                elif c == unichr(0x15):      # CTRL + U
+                    # upload files to board
+                    self.show_title('Upload files')
+
+                    abconfig_list = list(reversed(self.list_files(levels=1, for_py=False)))
+
+                    if len(abconfig_list) == 1:
+                        abconfig = abconfig_list[0]
+                    elif len(abconfig_list) > 0:
+                        for index, file in enumerate(abconfig_list, start=1):
+                            print(f'    [{index}] {file}')
+
+                        selected = None
+                        while True:
+                            try:
+                                selected = int(input('Choose a config file: '))
+                                assert type(selected) is int and 0 < selected <= len(abconfig_list)
+                                break
+                            except EOFError:
+                                break
+                            except:
+                                pass
+
+                        if not selected:
+                            self.run_board_file(b'\n')
+                            continue
+                        abconfig = abconfig_list[selected - 1]
+                    else:
+                        self.show_tips('No ab config file found')
+                        continue
+
+                    from .__main__ import parse_config_file, list_all_files_and_dirs, CMD_MKDIRS
+
+                    includes, excludes, run_file = parse_config_file(abconfig)
+                    include_files, include_dirs, _ = list_all_files_and_dirs(includes, excludes)
+
+                    if not include_files:
+                        self.show_tips('Nothing to do!')
+                        continue
+
+                    cmd = CMD_MKDIRS.format(include_dirs, True)
+                    self.run_board_file(bytes(cmd, 'utf-8'))
+
+                    time.sleep(0.5)
+
+                    for index, file in enumerate(include_files, start=1):
+                        print(f'- uploading {file} ({index}/{len(include_files)})')
+
+                        src = os.path.join(file)
+                        dest = file
+                        self.put_file(src, dest)
+                    print('Upload Finished')
+                    self.serial.write(b'\x04')
+                    time.sleep(0.2)
+
+                    if run_file in include_files:
+                        time.sleep(0.2)
+                        self.show_title('Run onboard file: {}'.format(run_file))
+                        exec(open(run_file).read(), globals())
+                        self.run_board_file(b'\n')
                 elif c == unichr(0x0c):     # CTRL + L
                     if self.last_run:
                         site, pyfile = self.last_run

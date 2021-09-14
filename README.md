@@ -35,17 +35,22 @@ $ pip install -e .
 
 * 在你的项目文件夹下新建`abconfig`文件（`ab`工具默认查找该配置文件，也可以手动指定其它文件）
 
-* 配置文件中填写需要上传的文件夹或文件，每行一个，以`#`号开头的行表示需要排除的文件夹或文件，例如：
+* 配置文件中填写需要上传的文件夹或文件，每行一个，例如：
 
 	```doc
 	drivers/
-	services/
+	!test.py
 	main.py
+	!services/
 	not_exists/
 
-	# services/websocket.py
+	#services/websocket.py
 	# .git/
 	```
+
+	> 以`#`号开头的行：上传时排除的文件夹或文件
+	> 以`!`号开头的行：在`repl`模式下上传文件后立即运行的文件
+
 * 在需要上传项目文件的时候执行如下命令即可
 
 	```bash
@@ -88,7 +93,7 @@ $ pip install -e .
 	Upload Finished
 	```
 
-### 如何进入`repl`模式
+### REPL 模式使用说明
 
 ```bash
 $ ab --repl
@@ -123,10 +128,11 @@ For generic online docs please visit http://docs.micropython.org/
 * <kbd>Ctrl</kbd> + <kbd>R</kbd>：运行本地文件
 * <kbd>Ctrl</kbd> + <kbd>T</kbd>：运行远程文件
 * <kbd>Ctrl</kbd> + <kbd>L</kbd>：再次运行上次的本地文件
+* <kbd>Ctrl</kbd> + <kbd>U</kbd>：上传配置文件中指定的文件
 
 #### 一键删除`main.py`文件
 
-有些时候由于在代码中写入死循环，导致无法删除或者重新上传文件的情况，可以尝试使用快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>对`main.py`文件进行删除
+有些时候由于在代码中写入死循环，导致无法删除或者重新上传文件的情况，可以尝试使用这个功能，快捷键为：<kbd>Ctrl</kbd> + <kbd>X</kbd>
 
 #### 运行本地`.py`文件
 
@@ -152,7 +158,7 @@ this is a local py file
 >>>
 ```
 
-#### 运行远程`py`文件
+#### 运行远程`.py`文件
 
 也就是运行开发板上的文件，快捷键为：<kbd>Ctrl</kbd> + <kbd>T</kbd>
 
@@ -197,6 +203,10 @@ slave id: 60
 >
 > 因为开发板上文件的运行方式不同，所以暂不支持一键重新运行
 
+#### 上传配置文件中指定的文件
+
+省去每次上传文件都要退出`repl`模式的麻烦，快捷键为：<kbd>Ctrl</kbd> + <kbd>U</kbd>
+
 ### 参数说明
 
 * `-h`：显示使用说明
@@ -214,6 +224,7 @@ slave id: 60
 
 ### 更新记录
 
+* `v0.6`：增加在`repl`模式下直接上传文件的功能
 * `v0.5`：
 	* 调整了`repl`模式下的快捷键
 	* `repl`模式增加运行本地文件功能
@@ -255,7 +266,9 @@ Ctrl +:
 	J, M - enter key
 	P - up key
 	V - mostly paste
+```
 
+```bash
 # 之前使用的
 Ctrl +:
 	L - show serial port info
@@ -265,7 +278,9 @@ Ctrl +:
 	U - run code in clipboard
 	] - quit
 	[ - delete onboard file main.py
+```
 
+```bash
 # 现在使用的
 Ctrl +:
 	Z - quit
@@ -276,27 +291,25 @@ Ctrl +:
 	R - run local pyfile
 	T - run onboard pyfile
 	G - run code in clipboard
+	U - upload files to board
+```
 
+```bash
 # 可用的 (闲置的)
 Ctrl +:
 	F - vsc 冲突
-	G
 	H - bs 冲突
-	K
-	N
-	Q
-	S
-	W
-	X
-	Y
-	Z
+	K - vsc 冲突
+	Q - vsc 冲突
+	S - vsc 冲突
+	W - cmder 冲突
 ```
 
-### 合作交流
+### 合作及交流
 
 * 联系邮箱：<walkline@163.com>
 * QQ 交流群：
-	* 走线物联：163271910
-	* 扇贝物联：31324057
+	* 走线物联：[163271910](https://jq.qq.com/?_wv=1027&k=VlT7Bjs9)
+	* 扇贝物联：[31324057](https://jq.qq.com/?_wv=1027&k=IQh2OLw9)
 
 <p align="center"><img src="https://gitee.com/walkline/WeatherStation/raw/docs/images/qrcode_walkline.png" width="300px" alt="走线物联"><img src="https://gitee.com/walkline/WeatherStation/raw/docs/images/qrcode_bigiot.png" width="300px" alt="扇贝物联"></p>
