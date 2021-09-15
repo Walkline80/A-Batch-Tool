@@ -537,16 +537,25 @@ class Miniterm(object):
         self.serial.write(b"\x04")
         self._pause_reader = False
 
+    def run_code_on_board(self, onboard_code):
+        self.serial.write(b'\x05')
+        time.sleep(0.01)
+        for i in range(0, len(onboard_code), 256):
+            self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
+            time.sleep(0.02)
+        self.serial.write(b"\x04")
+        time.sleep(0.01)
+
     def put_file(self, src, dest):
-        self.run_board_file(bytes("f=open('%s','wb')\nw=f.write" % dest, 'utf-8'))
+        self.run_code_on_board(bytes("f=open('%s','wb')\nw=f.write" % dest, 'utf-8'))
 
         with open(src, "rb") as f:
             while True:
                 data = f.read(256)
                 if not data:
                     break
-                self.run_board_file(bytes("w(" + repr(data) + ")", 'utf-8'))
-        self.run_board_file(b"f.close()")
+                self.run_code_on_board(bytes("w(" + repr(data) + ")", 'utf-8'))
+        self.run_code_on_board(b"f.close()")
 
     def show_title(self, title):
         '''(新增函数)
@@ -643,31 +652,35 @@ class Miniterm(object):
                     cmd = CMD_MKDIRS.format(include_dirs, True)
                     self.run_board_file(bytes(cmd, 'utf-8'))
 
-                    time.sleep(0.5)
+                    time.sleep(0.2)
 
+                    self._pause_reader = True
                     for index, file in enumerate(include_files, start=1):
                         print(f'- uploading {file} ({index}/{len(include_files)})')
 
                         src = os.path.join(file)
                         dest = file
                         self.put_file(src, dest)
+                    self._pause_reader = False
+
                     print('Upload Finished')
                     self.serial.write(b'\x04')
-                    time.sleep(0.2)
 
                     if run_file in include_files:
-                        time.sleep(0.2)
                         self.show_title('Run onboard file: {}'.format(run_file))
-                        exec(open(run_file).read(), globals())
-                        self.run_board_file(b'\n')
+                        self.run_board_file(open(run_file, 'rb').read())
+
+                        self.last_run = ('board', run_file)
                 elif c == unichr(0x0c):     # CTRL + L
                     if self.last_run:
                         site, pyfile = self.last_run
                         
                         if site == 'local':
+                            self.show_title(f'Run local file: {pyfile}')
                             self.run_local_file(pyfile)
                         elif site == 'board':
-                            self.run_board_file(pyfile)
+                            self.show_title(f'Run onboard file: {pyfile}')
+                            self.run_board_file(open(pyfile, 'rb').read())
                         elif site == 'clipboard':
                             self.run_clipboard_code()
                         else:
