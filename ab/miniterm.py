@@ -540,9 +540,11 @@ class Miniterm(object):
     def run_code_on_board(self, onboard_code):
         self.serial.write(b'\x05')
         time.sleep(0.02)
-        for i in range(0, len(onboard_code), 256):
-            self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
-            time.sleep(0.01)
+        lock = threading.Lock()
+        with lock:
+            for i in range(0, len(onboard_code), 256):
+                self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
+                time.sleep(0.03)
         self.serial.write(b"\x04")
         time.sleep(0.02)
 
@@ -654,18 +656,16 @@ class Miniterm(object):
                     time.sleep(0.2)
 
                     self._pause_reader = True
-                    # time.sleep(0.5)
-                    lock = threading.Lock()
-                    with lock:
-                        for index, file in enumerate(include_files, start=1):
-                            print(f'- uploading {file} ({index}/{len(include_files)})')
+                    time.sleep(0.2)
+                    for index, file in enumerate(include_files, start=1):
+                        print(f'- uploading {file} ({index}/{len(include_files)})')
 
-                            src = os.path.join(file)
-                            dest = file
-                            self.put_file(src, dest)
+                        src = os.path.join(file)
+                        dest = file
+                        self.put_file(src, dest)
 
                     self._pause_reader = False
-                    # time.sleep(0.5)
+                    time.sleep(0.2)
 
                     print('Upload Finished')
                     self.serial.write(b'\x04')
