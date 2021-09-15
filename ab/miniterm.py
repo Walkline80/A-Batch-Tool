@@ -484,7 +484,7 @@ class Miniterm(object):
             start_time = time.time()
             for i in range(0, len(pyfile_data), 256):
                 self.serial.write(pyfile_data[i : min(i + 256, len(pyfile_data))])
-                time.sleep(0.02)
+                time.sleep(0.01)
 
             time.sleep(round(time.time() - start_time, 3))
             self.serial.write(b"\x04")
@@ -651,22 +651,25 @@ class Miniterm(object):
 
                     cmd = CMD_MKDIRS.format(include_dirs, True)
                     self.run_board_file(bytes(cmd, 'utf-8'))
-
                     time.sleep(0.2)
 
                     self._pause_reader = True
-                    time.sleep(0.5)
-                    for index, file in enumerate(include_files, start=1):
-                        print(f'- uploading {file} ({index}/{len(include_files)})')
+                    # time.sleep(0.5)
+                    lock = threading.Lock()
+                    with lock:
+                        for index, file in enumerate(include_files, start=1):
+                            print(f'- uploading {file} ({index}/{len(include_files)})')
 
-                        src = os.path.join(file)
-                        dest = file
-                        self.put_file(src, dest)
+                            src = os.path.join(file)
+                            dest = file
+                            self.put_file(src, dest)
+
                     self._pause_reader = False
-                    time.sleep(0.5)
+                    # time.sleep(0.5)
 
                     print('Upload Finished')
                     self.serial.write(b'\x04')
+                    time.sleep(0.2)
 
                     if run_file in include_files:
                         self.show_title('Run onboard file: {}'.format(run_file))
