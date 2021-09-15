@@ -484,7 +484,7 @@ class Miniterm(object):
             start_time = time.time()
             for i in range(0, len(pyfile_data), 256):
                 self.serial.write(pyfile_data[i : min(i + 256, len(pyfile_data))])
-                time.sleep(0.02)
+                time.sleep(0.01)
 
             time.sleep(round(time.time() - start_time, 3))
             self.serial.write(b"\x04")
@@ -539,12 +539,14 @@ class Miniterm(object):
 
     def run_code_on_board(self, onboard_code):
         self.serial.write(b'\x05')
-        time.sleep(0.01)
-        for i in range(0, len(onboard_code), 256):
-            self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
-            time.sleep(0.02)
+        time.sleep(0.02)
+        lock = threading.Lock()
+        with lock:
+            for i in range(0, len(onboard_code), 256):
+                self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
+                time.sleep(0.03)
         self.serial.write(b"\x04")
-        time.sleep(0.01)
+        time.sleep(0.02)
 
     def put_file(self, src, dest):
         self.run_code_on_board(bytes("f=open('%s','wb')\nw=f.write" % dest, 'utf-8'))
@@ -651,20 +653,23 @@ class Miniterm(object):
 
                     cmd = CMD_MKDIRS.format(include_dirs, True)
                     self.run_board_file(bytes(cmd, 'utf-8'))
-
                     time.sleep(0.2)
 
                     self._pause_reader = True
+                    time.sleep(0.2)
                     for index, file in enumerate(include_files, start=1):
                         print(f'- uploading {file} ({index}/{len(include_files)})')
 
                         src = os.path.join(file)
                         dest = file
                         self.put_file(src, dest)
+
                     self._pause_reader = False
+                    time.sleep(0.2)
 
                     print('Upload Finished')
                     self.serial.write(b'\x04')
+                    time.sleep(0.2)
 
                     if run_file in include_files:
                         self.show_title('Run onboard file: {}'.format(run_file))
