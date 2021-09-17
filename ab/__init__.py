@@ -5,8 +5,8 @@ Gitee: https://gitee.com/walkline/a-batch-tool
 """
 
 # Meta
-__version__ = '0.6.2'
-__version_info__ = (0, 6.2)
+__version__ = '0.7'
+__version_info__ = (0, 7)
 __license__ = "MIT" # See LICENSE.txt
 __author__ = 'Walkline Wang'
 __email__ = 'walkline@163.com'
