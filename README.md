@@ -240,6 +240,43 @@ slave id: 60
 
 > 上传时会查找根目录下以`abc`开头的文件作为配置文件
 
+### 烧录固件
+
+要烧录固件，可以使用如下命令并根据提示操作：
+
+> 每个选择列表中第一项为默认值，可使用回车直接选择
+
+```bash
+$ ab --flash
+
+An esptool shell
+
+Port List:
+  [1] COM3 - Silicon Labs CP210x USB to UART Bridge (COM3)
+  [2] COM1 - 通信端口 (COM1)
+Choose an option:
+
+Chip List:
+  [1] auto
+  [2] esp8266
+  [3] esp32
+  [4] esp32c3
+  [5] esp32s2
+  [6] esp32s3beta2
+  [7] esp32s3beta3
+  [8] esp32c6beta
+Choose an option:
+
+Address List:
+  [1] 0x1000
+  [2] 0x0 - for esp32c3
+Choose an option:
+
+Firmware List:
+  [1] wh_esp32_espnow_v1.17_20210912.bin
+Choose an option:
+```
+
 ### 参数说明
 
 * `-h`：显示使用说明
@@ -247,6 +284,7 @@ slave id: 60
 * `-q`：屏蔽操作过程中的相关提示
 * `-s`：模拟操作过程，不实际上传文件
 * `--repl`：进入`repl`模式
+* `--flash`：使用`esptool`烧录固件
 * `--readme`：在网页中显示使用说明
 
 ### 已知问题
@@ -258,6 +296,7 @@ slave id: 60
 
 ### 更新记录
 
+* `v0.7`：新增`--flash`参数，使用`esptool`烧录固件
 * `v0.6.2`：再次尝试修复`v0.6.1`的问题，应该是串口写入等待时间不够，只能增加延时
 * `v0.6.1`：修复`repl`模式下上传文件不完整和不能运行文件的问题
 * `v0.6`：增加在`repl`模式下直接上传文件的功能
