@@ -244,6 +244,12 @@ def main():
 		help = 'enter raw repl mode'
 	)
 	parser.add_option(
+		'--flash',
+		action = 'store_true',
+		dest = 'flash',
+		help = 'an esptool shell'
+	)
+	parser.add_option(
 		'--readme',
 		action = 'store_true',
 		dest = 'readme',
@@ -262,6 +268,12 @@ def main():
 			from miniterm import main
 		port = choose_a_port()
 		main(default_port=port)
+	elif options.flash:
+		try:
+			from .flash import run_esptool_shell
+		except ImportError:
+			from flash import run_esptool_shell
+		run_esptool_shell()
 	else:
 		ab(options, files)
 
