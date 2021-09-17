@@ -544,7 +544,7 @@ class Miniterm(object):
         with lock:
             for i in range(0, len(onboard_code), 256):
                 self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
-                time.sleep(0.03)
+                time.sleep(0.05)
         self.serial.write(b"\x04")
         time.sleep(0.02)
 
