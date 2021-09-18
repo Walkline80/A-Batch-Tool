@@ -90,9 +90,9 @@ def run_esptool_shell():
 
 	firmware = choose_an_option('Firmware', firmware_list)
 	
-	earse_command = f'esptool {__PORT} {__BAUD} {__CHIP} erase_flash'
-	write_command = f'esptool {__PORT} {__BAUD} {__CHIP} {__BEFORE} {__AFTER} write_flash {__MODE} {__SIZE} {__FREQ} {addr} {firmware}'
-	
+	earse_command = f'esptool.py {__PORT} {__BAUD} {__CHIP} erase_flash'
+	write_command = f'esptool.py {__PORT} {__BAUD} {__CHIP} {__BEFORE} {__AFTER} write_flash {__MODE} {__SIZE} {__FREQ} {addr} {firmware}'
+
 	try:
 		if os.system(earse_command) == 0:
 			os.system(write_command)
