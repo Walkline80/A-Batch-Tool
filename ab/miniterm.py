@@ -484,7 +484,7 @@ class Miniterm(object):
             start_time = time.time()
             for i in range(0, len(pyfile_data), 256):
                 self.serial.write(pyfile_data[i : min(i + 256, len(pyfile_data))])
-                time.sleep(0.01)
+                time.sleep(0.02)
 
             time.sleep(round(time.time() - start_time, 3))
             self.serial.write(b"\x04")
