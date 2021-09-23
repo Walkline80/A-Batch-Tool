@@ -82,13 +82,13 @@ def run_esptool_shell():
 
 	addr = choose_an_option('Address', __ADDR).split(' - ')[0]
 
-	firmware_list = list_files()
+	firmware_list = list(reversed(list_files()))
 
 	if len(firmware_list) < 0:
 		print('no firmware file found')
 		exit()
 
-	firmware = list(reversed(choose_an_option('Firmware', firmware_list)))
+	firmware = choose_an_option('Firmware', firmware_list)
 
 	earse_command = f'esptool {__PORT} {__BAUD} {__CHIP} erase_flash'
 	write_command = f'esptool {__PORT} {__BAUD} {__CHIP} {__BEFORE} {__AFTER} write_flash {__MODE} {__SIZE} {__FREQ} {addr} {firmware}'
