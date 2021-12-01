@@ -297,6 +297,7 @@ Choose an option:
 
 ### 更新记录
 
+* `v0.7.4`：`repl`模式使用回车键选择第一个端口
 * `v0.7.3`：修复`v0.7.2`的 bug，无语。。。。
 * `v0.7.2`：修改运行`esptool.py`为`esptool`。。。。
 * `v0.7.1`：修改运行`esptool`为`esptool.py`
