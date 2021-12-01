@@ -91,13 +91,21 @@ def choose_a_port():
 
 	print('Port List:')
 	for index, port in enumerate(port_list, start=1):
-		print(f'    [{index}] {port}')
-	
+		if index == 1:
+			print(f'\x1b[32m    [{index}] {port}\033[0m')
+		else:
+			print(f'    [{index}] {port}')
+
 	selected_port = None
 
 	while True:
 		try:
-			selected_port = int(input('Choose a port: '))
+			selected_port = input('Choose a port: ')
+			
+			if selected_port == '':
+				return port_list[0].split(' - ')[0]
+
+			selected_port = int(selected_port)
 
 			assert type(selected_port) is int and 0 < selected_port <= len(port_list)
 			
