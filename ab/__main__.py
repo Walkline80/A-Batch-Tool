@@ -91,10 +91,18 @@ def choose_a_port():
 
 	print('Port List:')
 	for index, port in enumerate(port_list, start=1):
+		if port.startswith('COM1'):
+			port_list.pop(index - 1)
+			continue
+
 		if index == 1:
 			print(f'\x1b[32m    [{index}] {port}\033[0m')
 		else:
 			print(f'    [{index}] {port}')
+
+	if len(port_list) == 0:
+		print('    Not serial port found')
+		exit()
 
 	selected_port = None
 
