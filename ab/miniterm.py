@@ -602,7 +602,16 @@ class Miniterm(object):
                     # 一键删除开发板 main.py 文件
                     self._pause_reader = True
                     self.serial.write(b"\x05")
-                    self.serial.write(b'import os\rtry:\r  os.remove("main.py")\rexcept:\r  pass\r')
+                    self.serial.write(
+b'''import os
+from machine import reset
+try:
+  os.remove("main.py")
+except:
+  pass
+reset()
+'''
+)
                     self.serial.write(b'\x04')
                     time.sleep(0.2)
                     self._pause_reader = False
