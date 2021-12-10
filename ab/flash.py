@@ -93,7 +93,7 @@ def run_esptool_shell():
 
 	firmware_list = list(reversed(list_files()))
 
-	if len(firmware_list) < 0:
+	if len(firmware_list) <= 0:
 		print('no firmware file found')
 		exit()
 
