@@ -73,7 +73,16 @@ def run_esptool_shell():
 
 	print('An esptool shell')
 
-	port_list = [str(port) for port in comports()]
+	port_list = []
+
+	for port in comports():
+		if not str(port).startswith('COM1'):
+			port_list.append(str(port))
+
+	if len(port_list) == 0:
+		print('No serial port found')
+		exit()
+
 	port = choose_an_option('Port', port_list)
 	__PORT = __PORT.format(port.split(' - ')[0])
 
