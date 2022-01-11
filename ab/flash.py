@@ -76,7 +76,7 @@ def run_esptool_shell():
 	port_list = []
 
 	for port in comports():
-		if not str(port).startswith('COM1'):
+		if not str(port).startswith('COM1 '):
 			port_list.append(str(port))
 
 	if len(port_list) == 0:
