@@ -29,7 +29,7 @@ setup(
 	install_requires = [
 		'pyserial',
 		'pywin32',
-		'esptool'
+		'esptool>=3.1'
 		# 'adafruit-ampy',
 		# 'pyminifier'
 	]
