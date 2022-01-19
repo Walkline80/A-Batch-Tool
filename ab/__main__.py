@@ -90,7 +90,7 @@ def choose_a_port():
 	port_list = []
 
 	for port in comports():
-		if not str(port).startswith('COM1'):
+		if not str(port).startswith('COM1 '):
 			port_list.append(str(port))
 
 	if len(port_list) == 0:
