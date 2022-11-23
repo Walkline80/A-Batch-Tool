@@ -126,7 +126,7 @@ $ pip install -e .
 ### REPL 模式使用说明
 
 ```bash
-$ ab --repl
+$ ab --repl # --replcdc // for usb cdc visual serial port
 Port List:
     [1] COM3 - Silicon Labs CP210x USB to UART Bridge (COM3)
     [2] COM1 - 通信端口 (COM1)
@@ -284,6 +284,7 @@ Choose an option:
 * `-q`：屏蔽操作过程中的相关提示
 * `-s`：模拟操作过程，不实际上传文件
 * `--repl`：进入`repl`模式
+* `--replcdc`：进入虚拟串口`repl`模式
 * `--flash`：使用`esptool`烧录固件
 * `--readme`：在网页中显示使用说明
 
@@ -297,6 +298,7 @@ Choose an option:
 
 ### 更新记录
 
+* `v0.7.10`：新增`--replcdc`参数，可用于虚拟串口调试
 * `v0.7.9`：修复串口号过滤错误
 * `v0.7.8`：修复串口号过滤错误，增加对`esptool`工具的版本要求
 * `v0.7.7`：烧录固件工具串口列表过滤掉`COM1`
