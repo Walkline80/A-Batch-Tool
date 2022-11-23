@@ -260,6 +260,13 @@ def main():
 		help = 'enter raw repl mode'
 	)
 	parser.add_option(
+		'--replcdc',
+		action = 'store_true',
+		dest = 'replcdc',
+		default = False,
+		help = 'enter raw repl mode via usb cdc'
+	)
+	parser.add_option(
 		'--flash',
 		action = 'store_true',
 		dest = 'flash',
@@ -277,13 +284,13 @@ def main():
 	if options.readme:
 		import webbrowser
 		webbrowser.open('https://gitee.com/walkline/a-batch-tool')
-	elif options.repl:
+	elif options.repl or options.replcdc:
 		try:
 			from .miniterm import main
 		except ImportError:
 			from miniterm import main
 		port = choose_a_port()
-		main(default_port=port)
+		main(default_port=port, default_dtr=True if options.replcdc else False)
 	elif options.flash:
 		try:
 			from .flash import run_esptool_shell
