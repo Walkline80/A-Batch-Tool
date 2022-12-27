@@ -477,22 +477,22 @@ class Miniterm(object):
                 pyfile_data = file.read()
 
             self._pause_reader = True
-            time.sleep(0.02)
+            time.sleep(0.04)
             self.serial.write(b"\x05")
-            time.sleep(0.02)
+            time.sleep(0.04)
 
             start_time = time.time()
-            for i in range(0, len(pyfile_data), 256):
-                self.serial.write(pyfile_data[i : min(i + 256, len(pyfile_data))])
-                time.sleep(0.04)
+            for i in range(0, len(pyfile_data), 128):
+                self.serial.write(pyfile_data[i : min(i + 128, len(pyfile_data))])
+                time.sleep(0.02)
 
             time.sleep(round(time.time() - start_time, 3))
             self.serial.write(b"\x04")
-            time.sleep(0.02)
+            # time.sleep(0.02)
             self._pause_reader = False
-            time.sleep(0.02)
+            # time.sleep(0.02)
             self.console.write_bytes(b'\r\n')
-            time.sleep(0.02)
+            # time.sleep(0.02)
 
             self.last_run = ('local', pyfile)
 
@@ -528,8 +528,8 @@ class Miniterm(object):
         self._pause_reader = True
         self.serial.write(b'\x05')
         start_time = time.time()
-        for i in range(0, len(onboard_code), 256):
-            self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
+        for i in range(0, len(onboard_code), 128):
+            self.serial.write(onboard_code[i : min(i + 128, len(onboard_code))])
             time.sleep(0.02)
 
         time.sleep(round(time.time() - start_time, 3))
@@ -542,11 +542,11 @@ class Miniterm(object):
         time.sleep(0.02)
         lock = threading.Lock()
         with lock:
-            for i in range(0, len(onboard_code), 256):
-                self.serial.write(onboard_code[i : min(i + 256, len(onboard_code))])
-                time.sleep(0.05)
+            for i in range(0, len(onboard_code), 128):
+                self.serial.write(onboard_code[i : min(i + 128, len(onboard_code))])
+                time.sleep(0.02)
         self.serial.write(b"\x04")
-        time.sleep(0.02)
+        # time.sleep(0.02)
 
     def put_file(self, src, dest):
         self.run_code_on_board(bytes("f=open('%s','wb')\nw=f.write" % dest, 'utf-8'))
@@ -601,7 +601,9 @@ class Miniterm(object):
                 elif c == unichr(0x18):     # CTRL + X
                     # 一键删除开发板 main.py 文件
                     self._pause_reader = True
+                    time.sleep(0.04)
                     self.serial.write(b"\x05")
+                    time.sleep(0.04)
                     self.serial.write(
 b'''import os
 from machine import reset
@@ -612,8 +614,8 @@ except:
 reset()
 '''
 )
+                    time.sleep(0.02)
                     self.serial.write(b'\x04')
-                    time.sleep(0.2)
                     self._pause_reader = False
                     self.serial.write(b'\x04')
                 elif c == unichr(0x12):     # CTRL + R
