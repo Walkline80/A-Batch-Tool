@@ -60,16 +60,16 @@ def list_files(root='.', levels=2, extention='.bin'):
 	return files
 
 def run_esptool_shell():
-	__CHIP_LIST = ['auto', 'esp8266', 'esp32', 'esp32c3', 'esp32s2', 'esp32s3beta2', 'esp32s3beta3', 'esp32c6beta']
+	__CHIP_LIST = ['auto', 'esp8266', 'esp32', 'esp32c3', 'esp32s2', 'esp32s3', 'esp32c2', 'esp32c6', 'esp32s3beta2', 'esp32c6beta', 'esp32h2beta1', 'esp32h2beta2']
 	__CHIP = '--chip {}'
 	__PORT = '--port {}'
 	__BAUD = '--baud 921600'
 	__BEFORE = '--before default_reset'
 	__AFTER = '--after hard_reset'
-	__MODE = '--flash_mode dio'
+	__MODE = '--flash_mode keep'
 	__SIZE = '--flash_size detect'
-	__FREQ = '--flash_freq 40m'
-	__ADDR = ['0x1000', '0x0 - for esp32c3']
+	__FREQ = '--flash_freq keep'
+	__ADDR = ['0x1000', '0x0 - for esp32c3, esp32s3']
 
 	print('An esptool shell')
 
