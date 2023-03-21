@@ -253,7 +253,6 @@ An esptool shell
 
 Port List:
   [1] COM3 - Silicon Labs CP210x USB to UART Bridge (COM3)
-  [2] COM1 - 通信端口 (COM1)
 Choose an option:
 
 Chip List:
@@ -262,14 +261,18 @@ Chip List:
   [3] esp32
   [4] esp32c3
   [5] esp32s2
-  [6] esp32s3beta2
-  [7] esp32s3beta3
-  [8] esp32c6beta
+  [6] esp32s3
+  [7] esp32c2
+  [8] esp32c6
+  [9] esp32s3beta2
+  [10] esp32c6beta
+  [11] esp32h2beta1
+  [12] esp32h2beta2
 Choose an option:
 
 Address List:
   [1] 0x1000
-  [2] 0x0 - for esp32c3
+  [2] 0x0 - for esp32c3, esp32s3
 Choose an option:
 
 Firmware List:
@@ -298,6 +301,7 @@ Choose an option:
 
 ### 更新记录
 
+* `v0.7.13`：精简代码
 * `v0.7.12`：
 	* 修复`USB CDC`模式下快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>无法正常复位的问题
 	* 修复`USB CDC`模式下运行本地文件串口卡死的问题
