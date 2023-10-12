@@ -484,7 +484,7 @@ class Miniterm(object):
             start_time = time.time()
             for i in range(0, len(pyfile_data), 128):
                 self.serial.write(pyfile_data[i : min(i + 128, len(pyfile_data))])
-                time.sleep(0.02)
+                time.sleep(0.04)
 
             time.sleep(round(time.time() - start_time, 3))
             self.serial.write(b"\x04")
@@ -606,11 +606,15 @@ class Miniterm(object):
                     time.sleep(0.04)
                     self.serial.write(
 b'''import os
-from machine import reset
 try:
   os.remove("main.py")
 except:
   pass
+import network
+_=network.WLAN(network.STA_IF).active(False)
+#from utime import sleep_ms
+#sleep_ms(100)
+from machine import reset
 reset()
 '''
 )
