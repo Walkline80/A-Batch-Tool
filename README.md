@@ -301,6 +301,7 @@ Choose an option:
 
 ### 更新记录
 
+* `v0.7.14`：修复快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>可能导致串口卡死的问题
 * `v0.7.13`：精简代码
 * `v0.7.12`：
 	* 修复`USB CDC`模式下快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>无法正常复位的问题
