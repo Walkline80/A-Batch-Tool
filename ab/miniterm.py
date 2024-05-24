@@ -421,13 +421,16 @@ class Miniterm(object):
         递归获取指定目录及默认 2 层子目录下的 py 文件
         '''
         files = []
+        exclude_dirs = ['.git', '.vscode', '__pycache__', 'venv', 'useless', 'backup']
+
         if levels == 0:
             return files
 
         for dir in os.listdir(root):
             fullpath = os.path.join(root, dir)
             if os.path.isdir(fullpath):
-                files.extend(self.list_files(fullpath, levels - 1))
+                if dir not in exclude_dirs:
+                    files.extend(self.list_files(fullpath, levels - 1))
             else:
                 if for_py:
                     if fullpath.endswith('.py'):
@@ -440,9 +443,10 @@ class Miniterm(object):
 
     def get_local_pyfile(self) -> str or None:
         '''(新增函数)
-        获取用户选择的本地 py 文件，文件以列表形式供用户选择，列表文件选取范围是当前目录及 2 层子目录下的 py 文件
+        获取用户选择的本地 py 文件，文件以列表形式供用户选择，列表文件选取范围是当前目录及 4 层子目录下的 py 文件
         '''
-        file_list = list(reversed(self.list_files()))
+        file_list = self.list_files(levels=4)
+        file_list.sort()
 
         if len(file_list) > 0:
             self.show_title('Run local file')

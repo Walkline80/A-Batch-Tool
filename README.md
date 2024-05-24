@@ -301,6 +301,15 @@ Choose an option:
 
 ### 更新记录
 
+* `v0.7.15`：
+	* 修改`get_local_pyfile()`函数中遍历文件夹层数，从原来的`2`层调整到`4`层
+	* `list_files()`函数增加排除目录列表，目前排除的目录包含：
+		* .git
+		* .vscode
+		* __pycache__
+		* venv
+		* useless
+		* backup
 * `v0.7.14`：修复快捷键<kbd>Ctrl</kbd> + <kbd>X</kbd>可能导致串口卡死的问题
 * `v0.7.13`：精简代码
 * `v0.7.12`：
