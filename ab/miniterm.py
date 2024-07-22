@@ -421,7 +421,10 @@ class Miniterm(object):
         递归获取指定目录及默认 2 层子目录下的 py 文件
         '''
         files = []
-        exclude_dirs = ['.git', '.vscode', '__pycache__', 'venv', 'useless', 'backup']
+        exclude_dirs = [
+            '.git', '.vscode', '__pycache__', 'venv',
+            'useless', 'backup', 'blelib'
+        ]
 
         if levels == 0:
             return files
@@ -441,7 +444,7 @@ class Miniterm(object):
 
         return files
 
-    def get_local_pyfile(self) -> str or None:
+    def get_local_pyfile(self) -> str | None:
         '''(新增函数)
         获取用户选择的本地 py 文件，文件以列表形式供用户选择，列表文件选取范围是当前目录及 4 层子目录下的 py 文件
         '''
@@ -615,8 +618,9 @@ try:
 except:
   pass
 import network
-_=network.WLAN(network.STA_IF).active(False)
-#from utime import sleep_ms
+sta=network.WLAN(network.STA_IF)
+if sta.active(): sta.active(False)
+#from time import sleep_ms
 #sleep_ms(100)
 from machine import reset
 reset()
